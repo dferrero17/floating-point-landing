@@ -1,0 +1,1074 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>floating point — engineering solutions</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f5f3ee'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%2315141a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --paper:    #f5f3ee;
+  --mist:     #e8e5dd;
+  --fog:      #9a9a9e;
+  --ink-soft: #2a2730;
+  --ink:      #15141a;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink-soft);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; transition: opacity 180ms var(--ease); }
+a:hover { opacity: 0.6; }
+
+.fp-util, .fp-section__util {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+
+.fp-lockup {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: -0.038em;
+  color: var(--ink);
+  display: inline-block;
+  white-space: nowrap;
+}
+.fp-lockup__dot { color: var(--ink); }
+.fp-lockup--small { font-size: 22px; }
+
+.fp-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--paper);
+  transition: border-color 180ms var(--ease);
+  border-bottom: 1px solid transparent;
+}
+.fp-header.is-scrolled { border-bottom-color: var(--mist); }
+.fp-header__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 20px 48px;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+}
+.fp-nav { display: flex; gap: 28px; margin-left: auto; }
+.fp-nav__link {
+  font-size: 14px;
+  color: var(--ink-soft);
+  position: relative;
+}
+.fp-nav__link.is-current { color: var(--ink); }
+.fp-nav__link.is-current::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -6px;
+  height: 1px;
+  background: var(--ink);
+}
+
+.fp-cta {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 12px 18px;
+  border: none;
+  cursor: pointer;
+  letter-spacing: -0.005em;
+  transition: background 180ms var(--ease);
+}
+.fp-cta:hover { background: var(--ink-soft); opacity: 1; }
+.fp-cta--ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+}
+.fp-cta--ghost:hover { background: var(--ink); color: var(--paper); }
+
+.fp-link {
+  font-size: 14px;
+  color: var(--ink);
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 2px;
+}
+
+.fp-hero {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 96px 48px 128px;
+}
+.fp-hero__util { margin-bottom: 32px; }
+.fp-hero__headline {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: clamp(56px, 9vw, 128px);
+  line-height: 0.98;
+  letter-spacing: -0.038em;
+  color: var(--ink);
+  margin: 0 0 32px 0;
+  max-width: 1100px;
+}
+.fp-hero__lockup {
+  display: inline-flex;
+  align-items: baseline;
+}
+.fp-hero__word {
+  font: inherit;
+  white-space: nowrap;
+  line-height: 1;
+}
+.fp-hero__period-bouncer {
+  display: inline-block;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--ink);
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+.fp-hero__lead {
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  max-width: 620px;
+  margin: 0 0 32px 0;
+}
+.fp-hero__actions { display: flex; align-items: center; gap: 24px; }
+
+.fp-section__header {
+  max-width: 1280px;
+  margin: 0 auto 48px;
+  padding: 0 48px;
+}
+.fp-section__util { display: block; margin-bottom: 12px; }
+.fp-section__heading {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: clamp(40px, 5vw, 64px);
+  letter-spacing: -0.024em;
+  line-height: 1.05;
+  color: var(--ink);
+  margin: 0;
+}
+.fp-section__header--inverted .fp-section__heading { color: var(--paper); }
+.fp-section__header--inverted .fp-section__util { color: var(--fog); }
+
+.fp-services {
+  border-top: 1px solid var(--mist);
+  padding: 96px 0 96px;
+}
+.fp-services__list {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 48px;
+  border-top: 1px solid var(--mist);
+}
+.fp-service {
+  display: grid;
+  grid-template-columns: 80px 1fr 2fr;
+  gap: 32px;
+  padding: 32px 0;
+  border-bottom: 1px solid var(--mist);
+  align-items: baseline;
+}
+.fp-service__n {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--fog);
+}
+.fp-service__title {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 28px;
+  letter-spacing: -0.018em;
+  color: var(--ink);
+  margin: 0;
+}
+.fp-service__body {
+  font-size: 16px;
+  color: var(--ink-soft);
+  margin: 0;
+  max-width: 560px;
+}
+
+.fp-cases { padding: 96px 0; }
+.fp-cases__grid {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 48px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.fp-case {
+  background: var(--mist);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 180ms var(--ease);
+  border: none;
+  outline: none;
+}
+.fp-case:hover, .fp-case:focus { background: #ddd9cf; }
+.fp-case__head {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+.fp-case__title {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 28px;
+  letter-spacing: -0.018em;
+  line-height: 1.1;
+  color: var(--ink);
+  margin: 4px 0 0 0;
+}
+.fp-case__client {
+  font-size: 13px;
+  color: var(--fog);
+  margin: 0 0 8px 0;
+}
+.fp-case__body {
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+}
+.fp-case__foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--fog);
+}
+.fp-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.fp-case__more {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.fp-studio {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 128px 0;
+}
+.fp-studio__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+.fp-studio__cols {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 64px;
+  margin-bottom: 96px;
+}
+.fp-studio__lead {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 32px;
+  letter-spacing: -0.012em;
+  line-height: 1.3;
+  color: var(--paper);
+  margin: 0;
+}
+.fp-studio__meta dl { margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.fp-studio__meta dl > div {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #2a2730;
+}
+.fp-studio__meta dt {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+.fp-studio__meta dd {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  margin: 0;
+  color: var(--paper);
+}
+.fp-studio .fp-section__header {
+  max-width: none;
+  margin: 0 0 48px;
+  padding: 0;
+}
+.fp-studio__people {
+  display: flex;
+  justify-content: center;
+  gap: 64px;
+  padding-top: 48px;
+  border-top: 1px solid #2a2730;
+}
+.fp-person { display: flex; gap: 16px; align-items: center; }
+.fp-person__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: var(--paper);
+  flex: none;
+  position: relative;
+}
+.fp-person__avatar::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 12px; height: 12px;
+  background: var(--ink);
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+}
+.fp-person__name { font-size: 15px; color: var(--paper); }
+.fp-person__role { font-size: 12px; color: var(--fog); }
+
+.fp-contact { padding: 128px 0; }
+.fp-form, .fp-contact__done {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.fp-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.fp-field { display: flex; flex-direction: column; gap: 6px; }
+.fp-field label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+.fp-field input, .fp-field textarea {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  padding: 12px 14px;
+  background: var(--paper);
+  border: 1px solid var(--fog);
+  color: var(--ink);
+  border-radius: 0;
+  outline: none;
+  transition: border-color 180ms var(--ease);
+}
+.fp-field input:focus, .fp-field textarea:focus { border-color: var(--ink); }
+.fp-field textarea { resize: vertical; min-height: 120px; }
+.fp-form__actions {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  margin-top: 8px;
+}
+.fp-form__note {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+.fp-contact__done {
+  padding-top: 32px;
+}
+.fp-contact__done-lead {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 56px;
+  letter-spacing: -0.024em;
+  color: var(--ink);
+  margin: 0;
+}
+
+.fp-footer {
+  background: var(--paper);
+  border-top: 1px solid var(--mist);
+  padding: 64px 0 32px;
+}
+.fp-footer__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 48px;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+}
+.fp-footer__col { display: flex; flex-direction: column; gap: 8px; }
+.fp-footer__col a, .fp-footer__col span { font-size: 14px; color: var(--ink-soft); }
+.fp-footer__util {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fog);
+  margin-bottom: 4px;
+}
+.fp-footer__tag {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 8px 0 0 0;
+  max-width: 240px;
+}
+.fp-footer__rule {
+  max-width: 1280px;
+  margin: 48px auto 24px;
+  height: 1px;
+  background: var(--mist);
+}
+.fp-footer__base {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 48px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+
+.fp-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(21, 20, 26, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 48px;
+}
+.fp-modal__panel {
+  background: var(--paper);
+  max-width: 720px;
+  width: 100%;
+  max-height: 80vh;
+  overflow: auto;
+  padding: 48px;
+}
+.fp-modal__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 24px;
+}
+.fp-modal__title {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 40px;
+  letter-spacing: -0.022em;
+  margin: 0;
+  color: var(--ink);
+}
+.fp-modal__close {
+  background: none;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--ink-soft);
+}
+.fp-modal__body { font-size: 16px; line-height: 1.6; color: var(--ink-soft); }
+.fp-modal__body p { margin: 0 0 16px 0; }
+
+@media (max-width: 960px) {
+  .fp-header__inner { padding: 18px 32px; gap: 24px; }
+  .fp-nav { gap: 20px; }
+  .fp-hero { padding: 72px 32px 96px; }
+  .fp-section__header { padding: 0 32px; margin-bottom: 32px; }
+  .fp-services { padding: 72px 0; }
+  .fp-services__list { padding: 0 32px; }
+  .fp-service { grid-template-columns: 56px 1fr; column-gap: 24px; row-gap: 8px; }
+  .fp-service__body { grid-column: 2; max-width: none; }
+  .fp-cases { padding: 72px 0; }
+  .fp-cases__grid { padding: 0 32px; grid-template-columns: 1fr; gap: 16px; }
+  .fp-case { padding: 28px; }
+  .fp-studio { padding: 96px 0; }
+  .fp-studio__inner { padding: 0 32px; }
+  .fp-studio__cols { grid-template-columns: 1fr; gap: 32px; margin-bottom: 64px; }
+  .fp-studio__lead { font-size: 26px; }
+  .fp-studio__people { flex-direction: column; align-items: flex-start; gap: 24px; }
+  .fp-contact { padding: 96px 0; }
+  .fp-form, .fp-contact__done { padding: 0 32px; }
+  .fp-footer__inner { grid-template-columns: 1fr 1fr; row-gap: 32px; column-gap: 32px; padding: 0 32px; }
+  .fp-footer__base { padding: 0 32px; }
+  .fp-footer__rule { margin-left: 32px; margin-right: 32px; }
+  .fp-modal { padding: 24px; }
+  .fp-modal__panel { padding: 32px; }
+  .fp-modal__title { font-size: 32px; }
+}
+
+@media (max-width: 600px) {
+  .fp-header__inner { padding: 14px 20px; gap: 16px; flex-wrap: wrap; }
+  .fp-nav {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    gap: 18px;
+    padding-top: 10px;
+    padding-bottom: 8px;
+    border-top: 1px solid var(--mist);
+    flex-wrap: wrap;
+  }
+  .fp-cta { font-size: 13px; padding: 10px 14px; }
+  .fp-hero { padding: 48px 20px 72px; }
+  .fp-hero__util { margin-bottom: 20px; }
+  .fp-hero__lead { font-size: 17px; margin-bottom: 28px; }
+  .fp-hero__actions { flex-direction: column; align-items: stretch; gap: 14px; }
+  .fp-hero__actions .fp-cta { text-align: center; }
+  .fp-hero__actions .fp-link { align-self: flex-start; }
+  .fp-section__header { padding: 0 20px; }
+  .fp-services { padding: 56px 0; }
+  .fp-services__list { padding: 0 20px; }
+  .fp-service { grid-template-columns: 1fr; gap: 6px; padding: 24px 0; }
+  .fp-cases { padding: 56px 0; }
+  .fp-cases__grid { padding: 0 20px; }
+  .fp-case { padding: 24px; }
+  .fp-case__title { font-size: 24px; }
+  .fp-studio { padding: 72px 0; }
+  .fp-studio__inner { padding: 0 20px; }
+  .fp-studio__lead { font-size: 22px; }
+  .fp-contact { padding: 72px 0; }
+  .fp-form, .fp-contact__done { padding: 0 20px; }
+  .fp-form__row { grid-template-columns: 1fr; }
+  .fp-form__actions { flex-direction: column; align-items: stretch; gap: 16px; }
+  .fp-form__note { text-align: center; }
+  .fp-contact__done-lead { font-size: 40px; }
+  .fp-footer__inner { grid-template-columns: 1fr; gap: 32px; padding: 0 20px; }
+  .fp-footer__base { flex-direction: column; align-items: flex-start; gap: 8px; padding: 0 20px; }
+  .fp-footer__rule { margin-left: 20px; margin-right: 20px; }
+  .fp-modal { padding: 12px; }
+  .fp-modal__panel { padding: 24px; max-height: 92vh; }
+  .fp-modal__head { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .fp-modal__title { font-size: 26px; }
+}
+</style>
+<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+function Header({ current = "work", onNavigate }) {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const items = ["work", "services", "studio", "\n"];
+
+  return (
+    <header className={`fp-header ${scrolled ? "is-scrolled" : ""}`}>
+      <div className="fp-header__inner">
+        <a className="fp-lockup" href="#top" onClick={(e) => { e.preventDefault(); onNavigate?.("top"); }}>
+          floating<span className="fp-lockup__dot">.</span>
+        </a>
+        <nav className="fp-nav">
+          {items.map((it) => (
+            <a
+              key={it}
+              href={`#${it}`}
+              className={`fp-nav__link ${current === it ? "is-current" : ""}`}
+              onClick={(e) => { e.preventDefault(); onNavigate?.(it); }}
+            >
+              {it}
+            </a>
+          ))}
+        </nav>
+        <a
+          href="#contact"
+          className="fp-cta"
+          onClick={(e) => { e.preventDefault(); onNavigate?.("contact"); }}
+        >
+          request a brief →
+        </a>
+      </div>
+    </header>
+  );
+}
+
+window.Header = Header;
+</script>
+
+<script type="text/babel" data-presets="react">
+function simulateBounce(name, SCALE) {
+  const o = {
+    holdBefore: 0.25,
+    fadeInDur: 0.18,
+    shortAntDur: 0.12,
+    finalAntDur: 0.36,
+    anticipationSquashY: 0.42,
+    startX: -640 * SCALE,
+    startY: -200 * SCALE,
+    launchVx: 490 * SCALE,
+    gravity: 2800 * SCALE,
+    restitution: 0.78,
+    friction: 0.78,
+    fps: 60,
+    maxBounces: 4,
+    settleThreshold: 80 * SCALE,
+    impactSquashFloor: 0.5,
+    stretchPerVel: 0.00055 / SCALE,
+    impactSquashCoef: 0.00045 / SCALE,
+    settleDur: 0.3,
+    holdAfter: 0.0,
+  };
+
+  const samples = [];
+  let t = 0;
+  samples.push({ t: 0, x: o.startX, y: o.startY, sx: 1, sy: 1, op: 0 });
+  samples.push({ t: o.holdBefore - 0.001, x: o.startX, y: o.startY, sx: 1, sy: 1, op: 0 });
+  t = o.holdBefore;
+
+  const dt = 1 / o.fps;
+  let x = o.startX, y = o.startY, vx = o.launchVx, vy = 0;
+  let bounces = 0, done = false;
+
+  while (!done && t < 12) {
+    vy += o.gravity * dt;
+    x += vx * dt;
+    y += vy * dt;
+
+    if (y >= 0) {
+      y = 0;
+      const impactSpeed = Math.abs(vy);
+      const sy_imp = Math.max(o.impactSquashFloor, 1 - impactSpeed * o.impactSquashCoef);
+      const sx_imp = 1 + (1 - sy_imp) * 0.7;
+      samples.push({ t, x, y: 0, sx: sx_imp, sy: sy_imp, impact: true });
+
+      vy = -impactSpeed * o.restitution;
+      vx *= o.friction;
+      bounces++;
+
+      if (Math.abs(vy) < o.settleThreshold || bounces >= o.maxBounces) {
+        done = true;
+        continue;
+      }
+
+      const isFinalWindup = (bounces === o.maxBounces - 1);
+      const antDur = isFinalWindup ? o.finalAntDur : o.shortAntDur;
+      const deepSquash = Math.max(o.anticipationSquashY, sy_imp - (isFinalWindup ? 0.12 : 0.05));
+      const antFrames = Math.round(antDur * o.fps);
+      for (let ii = 1; ii <= antFrames; ii++) {
+        const uu = ii / antFrames;
+        const ee = isFinalWindup
+          ? uu * uu
+          : (uu < 0.5 ? 4 * uu * uu * uu : 1 - Math.pow(-2 * uu + 2, 3) / 2);
+        const sy_a = sy_imp + (deepSquash - sy_imp) * ee;
+        const sx_a = 1 + (1 - sy_a) * 0.7;
+        samples.push({ t: t + antDur * uu, x, y: 0, sx: sx_a, sy: sy_a });
+      }
+      t += antDur;
+
+      samples.push({ t, x, y: 0, sx: 0.85, sy: 1.18, impact: true });
+      continue;
+    }
+
+    const spd = Math.abs(vy);
+    const sy_f = 1 + spd * o.stretchPerVel;
+    const sx_f = 2 - sy_f;
+    samples.push({ t, x, y, sx: sx_f, sy: sy_f });
+    t += dt;
+  }
+
+  const last = samples[samples.length - 1];
+  const startSx = last.sx, startSy = last.sy, startXSettle = last.x;
+  const settleFrames = Math.round(o.settleDur * o.fps);
+  for (let j = 1; j <= settleFrames; j++) {
+    const u2 = j / settleFrames;
+    const e2 = 1 - Math.pow(1 - u2, 3);
+    samples.push({
+      t: t + o.settleDur * u2,
+      x: startXSettle * (1 - e2),
+      y: 0,
+      sx: startSx + (1 - startSx) * e2,
+      sy: startSy + (1 - startSy) * e2,
+    });
+  }
+  t += o.settleDur;
+  samples.push({ t, x: 0, y: 0, sx: 1, sy: 1 });
+
+  const duration = samples[samples.length - 1].t;
+  const stride = 2;
+  const fadeEnd = o.holdBefore + o.fadeInDur;
+  const lines = [];
+  for (let k = 0; k < samples.length; k++) {
+    if (k !== 0 && k !== samples.length - 1 && k % stride !== 0 && !samples[k].impact) continue;
+    const s = samples[k];
+    const pct = ((s.t / duration) * 100).toFixed(2);
+    const op = (s.op !== undefined) ? s.op
+      : (s.t >= fadeEnd ? 1 : Math.max(0, (s.t - o.holdBefore) / o.fadeInDur));
+    lines.push(`${pct}% { opacity: ${op.toFixed(2)}; transform: translate(${s.x.toFixed(1)}px, ${s.y.toFixed(1)}px) scale(${s.sx.toFixed(3)}, ${s.sy.toFixed(3)}); }`);
+  }
+  return {
+    keyframes: `@keyframes ${name} {\n  ${lines.join("\n  ")}\n}`,
+    duration,
+  };
+}
+
+function Hero() {
+  const headlineRef = useRef(null);
+  const styleRef = useRef(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const h1 = headlineRef.current;
+    if (!h1) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const FS = parseFloat(getComputedStyle(h1).fontSize) || 96;
+    const SCALE = FS / 160;
+
+    const id = `fp-hero-bounce-${Math.random().toString(36).slice(2, 8)}`;
+    const sim = simulateBounce(id, SCALE);
+
+    const css = `
+      ${sim.keyframes}
+      .fp-hero__period-bouncer {
+        width: ${(33 * SCALE).toFixed(2)}px;
+        height: ${(33 * SCALE).toFixed(2)}px;
+        margin-left: ${(9 * SCALE).toFixed(2)}px;
+        opacity: 0;
+        transform: translate(${(-640 * SCALE).toFixed(1)}px, ${(-200 * SCALE).toFixed(1)}px);
+        ${reduced ? "" : `animation: ${id} ${sim.duration.toFixed(2)}s linear 1 forwards;`}
+      }
+      ${reduced ? `.fp-hero__period-bouncer { opacity: 1; transform: none; }` : ""}
+    `;
+    const style = document.createElement("style");
+    style.textContent = css;
+    document.head.appendChild(style);
+    styleRef.current = style;
+    setReady(true);
+    return () => { style.remove(); };
+  }, []);
+
+  return (
+    <section className="fp-hero" id="top">
+      <div className="fp-hero__util">engineering solutions · est. 2026</div>
+      <h1 className="fp-hero__headline" ref={headlineRef}>
+        <span className="fp-hero__lockup">
+          <span className="fp-hero__word">floating</span>
+          <span className="fp-hero__period-bouncer" aria-hidden="true" />
+        </span>
+      </h1>
+      <p className="fp-hero__lead">
+        engineering that lands where you put it. tight-tolerance systems for teams that don't accept drift. predictable cost. predictable timelines.
+      </p>
+      <div className="fp-hero__actions">
+        <a className="fp-cta" href="#contact">request a brief →</a>
+        <a className="fp-link" href="#work">see selected work →</a>
+      </div>
+    </section>
+  );
+}
+
+window.Hero = Hero;
+</script>
+
+<script type="text/babel" data-presets="react">
+const SERVICES = [
+  { n: "01", title: "lorem ipsum", body: "lorem ipsum dolor sit amet, consectetur adipiscing elit. sed do eiusmod tempor incididunt." },
+  { n: "02", title: "dolor sit amet", body: "ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip." },
+  { n: "03", title: "consectetur", body: "duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore." },
+  { n: "04", title: "adipiscing elit", body: "excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt." },
+];
+
+function Services() {
+  return (
+    <section className="fp-services" id="services">
+      <header className="fp-section__header">
+        <span className="fp-section__util">02 · services</span>
+        <h2 className="fp-section__heading">what we ship.</h2>
+      </header>
+      <div className="fp-services__list">
+        {SERVICES.map((s) => (
+          <article key={s.n} className="fp-service">
+            <div className="fp-service__n">{s.n}</div>
+            <h3 className="fp-service__title">{s.title}</h3>
+            <p className="fp-service__body">{s.body}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+window.Services = Services;
+</script>
+
+<script type="text/babel" data-presets="react">
+const CASES = [
+  { n: "042", title: "lorem ipsum dolor", client: "lorem ipsum", year: "2025", tag: "platform",
+    body: "lorem ipsum dolor sit amet, consectetur adipiscing elit. sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." },
+  { n: "037", title: "consectetur adipiscing", client: "dolor sit amet", year: "2024", tag: "internal",
+    body: "ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." },
+  { n: "031", title: "duis aute irure", client: "reprehenderit in voluptate", year: "2024", tag: "applied numerics",
+    body: "duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur." },
+  { n: "025", title: "excepteur sint occaecat", client: "sunt in culpa", year: "2023", tag: "platform",
+    body: "excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." },
+];
+
+function Cases({ onSelect }) {
+  return (
+    <section className="fp-cases" id="work">
+      <header className="fp-section__header">
+        <span className="fp-section__util">01 · selected work</span>
+        <h2 className="fp-section__heading">recent.</h2>
+      </header>
+      <div className="fp-cases__grid">
+        {CASES.map((c) => (
+          <article key={c.n} className="fp-case" onClick={() => onSelect?.(c)} tabIndex={0} role="button">
+            <div className="fp-case__head">
+              <span className="fp-case__n">case · {c.n}</span>
+              <span className="fp-case__year">{c.year}</span>
+            </div>
+            <h3 className="fp-case__title">{c.title}.</h3>
+            <p className="fp-case__client">{c.client}</p>
+            <p className="fp-case__body">{c.body}</p>
+            <div className="fp-case__foot">
+              <span className="fp-tag">{c.tag}</span>
+              <span className="fp-case__more">read →</span>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+window.Cases = Cases;
+</script>
+
+<script type="text/babel" data-presets="react">
+function Studio() {
+  return (
+    <section className="fp-studio" id="studio">
+      <div className="fp-studio__inner">
+        <header className="fp-section__header fp-section__header--inverted">
+          <span className="fp-section__util">03 · studio</span>
+          <h2 className="fp-section__heading">small. quiet. fixed-scope.</h2>
+        </header>
+        <div className="fp-studio__cols">
+          <div>
+            <p className="fp-studio__lead">
+              floating point is a two-person engineering studio in aveiro. we ship work for teams that don't accept drift.
+            </p>
+          </div>
+          <div className="fp-studio__meta">
+            <dl>
+              <div><dt>founded</dt><dd>2026</dd></div>
+              <div><dt>office</dt><dd>aveiro</dd></div>
+            </dl>
+          </div>
+        </div>
+        <div className="fp-studio__people">
+          <div className="fp-person"><div className="fp-person__avatar" /><div><div className="fp-person__name">vicente barros</div><div className="fp-person__role">co-founder</div></div></div>
+          <div className="fp-person"><div className="fp-person__avatar" /><div><div className="fp-person__name">daniel ferreira</div><div className="fp-person__role">co-founder</div></div></div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+window.Studio = Studio;
+</script>
+
+<script type="text/babel" data-presets="react">
+function Contact() {
+  const [submitted, setSubmitted] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", company: "", brief: "" });
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    setSubmitted(true);
+  };
+
+  return (
+    <section className="fp-contact" id="contact">
+      <header className="fp-section__header">
+        <span className="fp-section__util">04 · request a brief</span>
+        <h2 className="fp-section__heading">tell us what you're building.</h2>
+      </header>
+
+      {submitted ? (
+        <div className="fp-contact__done">
+          <p className="fp-contact__done-lead">received.</p>
+          <p>we read everything. we reply within two working days, usually one.</p>
+          <button className="fp-cta fp-cta--ghost" onClick={() => { setSubmitted(false); setForm({ name: "", email: "", company: "", brief: "" }); }}>
+            send another
+          </button>
+        </div>
+      ) : (
+        <form className="fp-form" onSubmit={onSubmit}>
+          <div className="fp-form__row">
+            <div className="fp-field">
+              <label>name</label>
+              <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="cole rafferty" />
+            </div>
+            <div className="fp-field">
+              <label>email</label>
+              <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="cole@floatingpoint.io" />
+            </div>
+          </div>
+          <div className="fp-field">
+            <label>company</label>
+            <input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} placeholder="optional" />
+          </div>
+          <div className="fp-field">
+            <label>brief</label>
+            <textarea required rows="5" value={form.brief} onChange={(e) => setForm({ ...form, brief: e.target.value })} placeholder="one paragraph is fine. what are you building, what is hard about it, when do you need it." />
+          </div>
+          <div className="fp-form__actions">
+            <button type="submit" className="fp-cta">send →</button>
+            <span className="fp-form__note">or write directly: cole@floatingpoint.io</span>
+          </div>
+        </form>
+      )}
+    </section>
+  );
+}
+
+window.Contact = Contact;
+</script>
+
+<script type="text/babel" data-presets="react">
+function Footer() {
+  return (
+    <footer className="fp-footer">
+      <div className="fp-footer__inner">
+        <div className="fp-footer__col">
+          <div className="fp-lockup fp-lockup--small">floating<span className="fp-lockup__dot">.</span></div>
+          <p className="fp-footer__tag">engineering that doesn't drift.</p>
+        </div>
+        <div className="fp-footer__col">
+          <div className="fp-footer__util">studio</div>
+          <a href="#">work</a>
+          <a href="#">services</a>
+          <a href="#">studio</a>
+          <a href="#">notes</a>
+        </div>
+        <div className="fp-footer__col">
+          <div className="fp-footer__util">contact</div>
+          <a href="mailto:daniel@floatingpoint.pt">daniel@floatingpoint.pt</a>
+          <a href="mailto:vicente@floatingpoint.pt">vicente@floatingpoint.pt</a>
+          <span>aveiro, portugal</span>
+        </div>
+        <div className="fp-footer__col">
+          <div className="fp-footer__util">elsewhere</div>
+          <a href="#">github</a>
+          <a href="#">linkedin</a>
+          <a href="#">are.na</a>
+        </div>
+      </div>
+      <div className="fp-footer__rule" />
+      <div className="fp-footer__base">
+        <span>floating point lda · est. 2026</span>
+        <span>aveiro · portugal</span>
+        <span>floatingpoint.pt</span>
+      </div>
+    </footer>
+  );
+}
+
+window.Footer = Footer;
+</script>
+
+<script type="text/babel" data-presets="react">
+function App() {
+  const [current, setCurrent] = useState("work");
+  const [selectedCase, setSelectedCase] = useState(null);
+
+  const onNavigate = (id) => {
+    setCurrent(id);
+    const map = { top: "top", work: "work", services: "services", studio: "studio", notes: "work", contact: "contact" };
+    const target = document.getElementById(map[id] || id);
+    if (target) target.scrollIntoView ? window.scrollTo({ top: target.offsetTop - 60, behavior: "smooth" }) : null;
+  };
+
+  return (
+    <>
+      <Header current={current} onNavigate={onNavigate} />
+      <Hero />
+      <Cases onSelect={setSelectedCase} />
+      <Services />
+      <Studio />
+      <Contact />
+      <Footer />
+      {selectedCase && (
+        <div className="fp-modal" onClick={() => setSelectedCase(null)}>
+          <div className="fp-modal__panel" onClick={(e) => e.stopPropagation()}>
+            <div className="fp-modal__head">
+              <div>
+                <div className="fp-util" style={{ marginBottom: 8 }}>case · {selectedCase.n} · {selectedCase.year}</div>
+                <h3 className="fp-modal__title">{selectedCase.title}.</h3>
+              </div>
+              <button className="fp-modal__close" onClick={() => setSelectedCase(null)}>close ✕</button>
+            </div>
+            <div className="fp-modal__body">
+              <p><strong style={{ color: "var(--ink)", fontWeight: 500 }}>{selectedCase.client}</strong></p>
+              <p>{selectedCase.body}</p>
+              <p>engagement scoped at four months. shipped in three. retained for ongoing work through {selectedCase.year}.</p>
+              <p>tech: rust, postgres, custom numerical kernels. typed end-to-end.</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
