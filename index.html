@@ -3,1072 +3,1001 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>floating point — engineering solutions</title>
+<meta name="description" content="floating point. software and cybersecurity, aveiro.">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f5f3ee'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%2315141a'/%3E%3C/svg%3E">
+<title>floating point</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap">
 <style>
-:root {
-  --paper:    #f5f3ee;
-  --mist:     #e8e5dd;
-  --fog:      #9a9a9e;
-  --ink-soft: #2a2730;
-  --ink:      #15141a;
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
-}
+  :root {
+    --paper:    #f5f3ee;
+    --mist:     #e8e5dd;
+    --fog:      #9a9a9e;
+    --ink-soft: #2a2730;
+    --ink:      #15141a;
+    --rule:      rgba(20, 20, 26, 0.10);
+    --rule-soft: rgba(20, 20, 26, 0.06);
+    --rule-on-ink: rgba(245, 243, 238, 0.14);
 
-* { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
-body {
-  background: var(--paper);
-  color: var(--ink-soft);
-  font-family: var(--font-sans);
-  font-size: 16px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-a { color: inherit; text-decoration: none; transition: opacity 180ms var(--ease); }
-a:hover { opacity: 0.6; }
-
-.fp-util, .fp-section__util {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--fog);
-}
-
-.fp-lockup {
-  font-family: var(--font-sans);
-  font-weight: 600;
-  font-size: 26px;
-  letter-spacing: -0.038em;
-  color: var(--ink);
-  display: inline-block;
-  white-space: nowrap;
-}
-.fp-lockup__dot { color: var(--ink); }
-.fp-lockup--small { font-size: 22px; }
-
-.fp-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: var(--paper);
-  transition: border-color 180ms var(--ease);
-  border-bottom: 1px solid transparent;
-}
-.fp-header.is-scrolled { border-bottom-color: var(--mist); }
-.fp-header__inner {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 20px 48px;
-  display: flex;
-  align-items: center;
-  gap: 48px;
-}
-.fp-nav { display: flex; gap: 28px; margin-left: auto; }
-.fp-nav__link {
-  font-size: 14px;
-  color: var(--ink-soft);
-  position: relative;
-}
-.fp-nav__link.is-current { color: var(--ink); }
-.fp-nav__link.is-current::after {
-  content: "";
-  position: absolute;
-  left: 0; right: 0; bottom: -6px;
-  height: 1px;
-  background: var(--ink);
-}
-
-.fp-cta {
-  display: inline-block;
-  font-family: var(--font-sans);
-  font-size: 14px;
-  background: var(--ink);
-  color: var(--paper);
-  padding: 12px 18px;
-  border: none;
-  cursor: pointer;
-  letter-spacing: -0.005em;
-  transition: background 180ms var(--ease);
-}
-.fp-cta:hover { background: var(--ink-soft); opacity: 1; }
-.fp-cta--ghost {
-  background: transparent;
-  color: var(--ink);
-  border: 1px solid var(--ink);
-}
-.fp-cta--ghost:hover { background: var(--ink); color: var(--paper); }
-
-.fp-link {
-  font-size: 14px;
-  color: var(--ink);
-  border-bottom: 1px solid var(--ink);
-  padding-bottom: 2px;
-}
-
-.fp-hero {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 96px 48px 128px;
-}
-.fp-hero__util { margin-bottom: 32px; }
-.fp-hero__headline {
-  font-family: var(--font-sans);
-  font-weight: 600;
-  font-size: clamp(56px, 9vw, 128px);
-  line-height: 0.98;
-  letter-spacing: -0.038em;
-  color: var(--ink);
-  margin: 0 0 32px 0;
-  max-width: 1100px;
-}
-.fp-hero__lockup {
-  display: inline-flex;
-  align-items: baseline;
-}
-.fp-hero__word {
-  font: inherit;
-  white-space: nowrap;
-  line-height: 1;
-}
-.fp-hero__period-bouncer {
-  display: inline-block;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: var(--ink);
-  transform-origin: 50% 100%;
-  will-change: transform, opacity;
-  pointer-events: none;
-}
-.fp-hero__lead {
-  font-size: 19px;
-  line-height: 1.5;
-  color: var(--ink-soft);
-  max-width: 620px;
-  margin: 0 0 32px 0;
-}
-.fp-hero__actions { display: flex; align-items: center; gap: 24px; }
-
-.fp-section__header {
-  max-width: 1280px;
-  margin: 0 auto 48px;
-  padding: 0 48px;
-}
-.fp-section__util { display: block; margin-bottom: 12px; }
-.fp-section__heading {
-  font-family: var(--font-sans);
-  font-weight: 600;
-  font-size: clamp(40px, 5vw, 64px);
-  letter-spacing: -0.024em;
-  line-height: 1.05;
-  color: var(--ink);
-  margin: 0;
-}
-.fp-section__header--inverted .fp-section__heading { color: var(--paper); }
-.fp-section__header--inverted .fp-section__util { color: var(--fog); }
-
-.fp-services {
-  border-top: 1px solid var(--mist);
-  padding: 96px 0 96px;
-}
-.fp-services__list {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 48px;
-  border-top: 1px solid var(--mist);
-}
-.fp-service {
-  display: grid;
-  grid-template-columns: 80px 1fr 2fr;
-  gap: 32px;
-  padding: 32px 0;
-  border-bottom: 1px solid var(--mist);
-  align-items: baseline;
-}
-.fp-service__n {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  color: var(--fog);
-}
-.fp-service__title {
-  font-family: var(--font-sans);
-  font-weight: 600;
-  font-size: 28px;
-  letter-spacing: -0.018em;
-  color: var(--ink);
-  margin: 0;
-}
-.fp-service__body {
-  font-size: 16px;
-  color: var(--ink-soft);
-  margin: 0;
-  max-width: 560px;
-}
-
-.fp-cases { padding: 96px 0; }
-.fp-cases__grid {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 48px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-}
-.fp-case {
-  background: var(--mist);
-  padding: 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  cursor: pointer;
-  transition: background 180ms var(--ease);
-  border: none;
-  outline: none;
-}
-.fp-case:hover, .fp-case:focus { background: #ddd9cf; }
-.fp-case__head {
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--fog);
-}
-.fp-case__title {
-  font-family: var(--font-sans);
-  font-weight: 600;
-  font-size: 28px;
-  letter-spacing: -0.018em;
-  line-height: 1.1;
-  color: var(--ink);
-  margin: 4px 0 0 0;
-}
-.fp-case__client {
-  font-size: 13px;
-  color: var(--fog);
-  margin: 0 0 8px 0;
-}
-.fp-case__body {
-  font-size: 15px;
-  color: var(--ink-soft);
-  line-height: 1.5;
-  margin: 0;
-  flex: 1;
-}
-.fp-case__foot {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--fog);
-}
-.fp-tag {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-.fp-case__more {
-  font-family: var(--font-sans);
-  font-size: 13px;
-  color: var(--ink);
-}
-
-.fp-studio {
-  background: var(--ink);
-  color: var(--paper);
-  padding: 128px 0;
-}
-.fp-studio__inner {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 48px;
-}
-.fp-studio__cols {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 64px;
-  margin-bottom: 96px;
-}
-.fp-studio__lead {
-  font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 32px;
-  letter-spacing: -0.012em;
-  line-height: 1.3;
-  color: var(--paper);
-  margin: 0;
-}
-.fp-studio__meta dl { margin: 0; display: flex; flex-direction: column; gap: 12px; }
-.fp-studio__meta dl > div {
-  display: flex;
-  justify-content: space-between;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #2a2730;
-}
-.fp-studio__meta dt {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--fog);
-}
-.fp-studio__meta dd {
-  font-family: var(--font-sans);
-  font-size: 14px;
-  margin: 0;
-  color: var(--paper);
-}
-.fp-studio .fp-section__header {
-  max-width: none;
-  margin: 0 0 48px;
-  padding: 0;
-}
-.fp-studio__people {
-  display: flex;
-  justify-content: center;
-  gap: 64px;
-  padding-top: 48px;
-  border-top: 1px solid #2a2730;
-}
-.fp-person { display: flex; gap: 16px; align-items: center; }
-.fp-person__avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 999px;
-  background: var(--paper);
-  flex: none;
-  position: relative;
-}
-.fp-person__avatar::after {
-  content: "";
-  position: absolute;
-  left: 50%; top: 50%;
-  width: 12px; height: 12px;
-  background: var(--ink);
-  border-radius: 999px;
-  transform: translate(-50%, -50%);
-}
-.fp-person__name { font-size: 15px; color: var(--paper); }
-.fp-person__role { font-size: 12px; color: var(--fog); }
-
-.fp-contact { padding: 128px 0; }
-.fp-form, .fp-contact__done {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 0 48px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-.fp-form__row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-}
-.fp-field { display: flex; flex-direction: column; gap: 6px; }
-.fp-field label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--fog);
-}
-.fp-field input, .fp-field textarea {
-  font-family: var(--font-sans);
-  font-size: 15px;
-  padding: 12px 14px;
-  background: var(--paper);
-  border: 1px solid var(--fog);
-  color: var(--ink);
-  border-radius: 0;
-  outline: none;
-  transition: border-color 180ms var(--ease);
-}
-.fp-field input:focus, .fp-field textarea:focus { border-color: var(--ink); }
-.fp-field textarea { resize: vertical; min-height: 120px; }
-.fp-form__actions {
-  display: flex;
-  gap: 24px;
-  align-items: center;
-  margin-top: 8px;
-}
-.fp-form__note {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--fog);
-}
-.fp-contact__done {
-  padding-top: 32px;
-}
-.fp-contact__done-lead {
-  font-family: var(--font-sans);
-  font-weight: 600;
-  font-size: 56px;
-  letter-spacing: -0.024em;
-  color: var(--ink);
-  margin: 0;
-}
-
-.fp-footer {
-  background: var(--paper);
-  border-top: 1px solid var(--mist);
-  padding: 64px 0 32px;
-}
-.fp-footer__inner {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 48px;
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 48px;
-}
-.fp-footer__col { display: flex; flex-direction: column; gap: 8px; }
-.fp-footer__col a, .fp-footer__col span { font-size: 14px; color: var(--ink-soft); }
-.fp-footer__util {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--fog);
-  margin-bottom: 4px;
-}
-.fp-footer__tag {
-  font-size: 14px;
-  color: var(--ink-soft);
-  margin: 8px 0 0 0;
-  max-width: 240px;
-}
-.fp-footer__rule {
-  max-width: 1280px;
-  margin: 48px auto 24px;
-  height: 1px;
-  background: var(--mist);
-}
-.fp-footer__base {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 48px;
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--fog);
-}
-
-.fp-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(21, 20, 26, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  padding: 48px;
-}
-.fp-modal__panel {
-  background: var(--paper);
-  max-width: 720px;
-  width: 100%;
-  max-height: 80vh;
-  overflow: auto;
-  padding: 48px;
-}
-.fp-modal__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 24px;
-}
-.fp-modal__title {
-  font-family: var(--font-sans);
-  font-weight: 600;
-  font-size: 40px;
-  letter-spacing: -0.022em;
-  margin: 0;
-  color: var(--ink);
-}
-.fp-modal__close {
-  background: none;
-  border: none;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  cursor: pointer;
-  color: var(--ink-soft);
-}
-.fp-modal__body { font-size: 16px; line-height: 1.6; color: var(--ink-soft); }
-.fp-modal__body p { margin: 0 0 16px 0; }
-
-@media (max-width: 960px) {
-  .fp-header__inner { padding: 18px 32px; gap: 24px; }
-  .fp-nav { gap: 20px; }
-  .fp-hero { padding: 72px 32px 96px; }
-  .fp-section__header { padding: 0 32px; margin-bottom: 32px; }
-  .fp-services { padding: 72px 0; }
-  .fp-services__list { padding: 0 32px; }
-  .fp-service { grid-template-columns: 56px 1fr; column-gap: 24px; row-gap: 8px; }
-  .fp-service__body { grid-column: 2; max-width: none; }
-  .fp-cases { padding: 72px 0; }
-  .fp-cases__grid { padding: 0 32px; grid-template-columns: 1fr; gap: 16px; }
-  .fp-case { padding: 28px; }
-  .fp-studio { padding: 96px 0; }
-  .fp-studio__inner { padding: 0 32px; }
-  .fp-studio__cols { grid-template-columns: 1fr; gap: 32px; margin-bottom: 64px; }
-  .fp-studio__lead { font-size: 26px; }
-  .fp-studio__people { flex-direction: column; align-items: flex-start; gap: 24px; }
-  .fp-contact { padding: 96px 0; }
-  .fp-form, .fp-contact__done { padding: 0 32px; }
-  .fp-footer__inner { grid-template-columns: 1fr 1fr; row-gap: 32px; column-gap: 32px; padding: 0 32px; }
-  .fp-footer__base { padding: 0 32px; }
-  .fp-footer__rule { margin-left: 32px; margin-right: 32px; }
-  .fp-modal { padding: 24px; }
-  .fp-modal__panel { padding: 32px; }
-  .fp-modal__title { font-size: 32px; }
-}
-
-@media (max-width: 600px) {
-  .fp-header__inner { padding: 14px 20px; gap: 16px; flex-wrap: wrap; }
-  .fp-nav {
-    order: 3;
-    width: 100%;
-    margin-left: 0;
-    gap: 18px;
-    padding-top: 10px;
-    padding-bottom: 8px;
-    border-top: 1px solid var(--mist);
-    flex-wrap: wrap;
+    --gutter: clamp(20px, 6vw, 96px);
+    --max: 1280px;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
-  .fp-cta { font-size: 13px; padding: 10px 14px; }
-  .fp-hero { padding: 48px 20px 72px; }
-  .fp-hero__util { margin-bottom: 20px; }
-  .fp-hero__lead { font-size: 17px; margin-bottom: 28px; }
-  .fp-hero__actions { flex-direction: column; align-items: stretch; gap: 14px; }
-  .fp-hero__actions .fp-cta { text-align: center; }
-  .fp-hero__actions .fp-link { align-self: flex-start; }
-  .fp-section__header { padding: 0 20px; }
-  .fp-services { padding: 56px 0; }
-  .fp-services__list { padding: 0 20px; }
-  .fp-service { grid-template-columns: 1fr; gap: 6px; padding: 24px 0; }
-  .fp-cases { padding: 56px 0; }
-  .fp-cases__grid { padding: 0 20px; }
-  .fp-case { padding: 24px; }
-  .fp-case__title { font-size: 24px; }
-  .fp-studio { padding: 72px 0; }
-  .fp-studio__inner { padding: 0 20px; }
-  .fp-studio__lead { font-size: 22px; }
-  .fp-contact { padding: 72px 0; }
-  .fp-form, .fp-contact__done { padding: 0 20px; }
-  .fp-form__row { grid-template-columns: 1fr; }
-  .fp-form__actions { flex-direction: column; align-items: stretch; gap: 16px; }
-  .fp-form__note { text-align: center; }
-  .fp-contact__done-lead { font-size: 40px; }
-  .fp-footer__inner { grid-template-columns: 1fr; gap: 32px; padding: 0 20px; }
-  .fp-footer__base { flex-direction: column; align-items: flex-start; gap: 8px; padding: 0 20px; }
-  .fp-footer__rule { margin-left: 20px; margin-right: 20px; }
-  .fp-modal { padding: 12px; }
-  .fp-modal__panel { padding: 24px; max-height: 92vh; }
-  .fp-modal__head { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .fp-modal__title { font-size: 26px; }
-}
+
+  * { box-sizing: border-box; }
+  html { color-scheme: light; }
+  html, body { margin: 0; padding: 0; }
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+  .lenis.lenis-stopped { overflow: hidden; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink-soft);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: 'cv11', 'ss03';
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
+    outline: 1.5px solid var(--ink);
+    outline-offset: 3px;
+  }
+  h1, h2, h3, p, dl, dd, dt, figure { margin: 0; }
+  h1, h2, h3 { text-wrap: balance; }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+
+  .util {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fog);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding-inline: var(--gutter);
+  }
+
+  .lockup {
+    font-weight: 600;
+    letter-spacing: -0.038em;
+    color: var(--ink);
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  /* ---------- header ---------- */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--paper);
+    border-bottom: 1px solid transparent;
+    transition: border-color 200ms var(--ease);
+  }
+  .header.is-scrolled { border-bottom-color: var(--rule); }
+  .header .wrap {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .header .lockup { font-size: 24px; }
+  .nav { display: flex; gap: 28px; font-size: 14px; }
+  .nav a { color: var(--ink-soft); transition: color 150ms var(--ease); }
+  .nav a:hover { color: var(--ink); }
+  .head-actions { display: flex; align-items: center; gap: 18px; }
+  .lang {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    color: var(--ink-soft);
+    padding: 6px 9px;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    transition: border-color 150ms var(--ease), color 150ms var(--ease);
+  }
+  .lang:hover { color: var(--ink); border-color: var(--ink); }
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 16px;
+    border-radius: 3px;
+    transition: opacity 150ms var(--ease), transform 150ms var(--ease);
+  }
+  .cta:hover { opacity: 0.86; }
+  .cta .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor;
+    transition: transform 200ms var(--ease);
+  }
+  .cta:hover .dot { transform: translateX(3px); }
+  .cta.ghost { background: transparent; color: var(--ink); border: 1px solid var(--rule); }
+  .cta.ghost:hover { border-color: var(--ink); opacity: 1; }
+  .link {
+    font-size: 14px;
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1px;
+    transition: border-color 150ms var(--ease), color 150ms var(--ease);
+  }
+  .link:hover { color: var(--ink); border-color: var(--ink); }
+
+  /* ---------- hero ---------- */
+  .hero {
+    position: relative;
+    min-height: calc(100svh - 64px);
+    display: flex;
+    align-items: center;
+    background: var(--paper);
+  }
+  .hero-inner { width: 100%; padding-block: clamp(48px, 8vh, 96px); }
+  .hero h1 {
+    font-size: clamp(72px, 17vw, 236px);
+    font-weight: 600;
+    letter-spacing: -0.038em;
+    line-height: 0.92;
+    color: var(--ink);
+    display: inline-flex;
+    align-items: baseline;
+    margin-left: -0.04em;
+  }
+  .hero .period {
+    display: inline-block;
+    width: 0.206em;
+    height: 0.206em;
+    margin-left: 0.056em;
+    border-radius: 50%;
+    background: var(--ink);
+    transform-origin: 50% 100%;
+    /* rests as a plain period when scripts or motion are off */
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin-top: clamp(32px, 5vh, 64px);
+  }
+  .hero .lead {
+    font-size: clamp(28px, 3.4vw, 44px);
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    color: var(--ink);
+    max-width: 22ch;
+  }
+  .hero .sub {
+    margin-top: 20px;
+    font-size: 17px;
+    line-height: 1.5;
+    max-width: 46ch;
+    text-wrap: pretty;
+    color: var(--ink-soft);
+  }
+  .hero .actions { display: flex; align-items: center; gap: 24px; margin-top: 32px; flex-wrap: wrap; }
+
+  /* ---------- sections ---------- */
+  section { scroll-margin-top: 64px; }
+  .section { padding-block: clamp(72px, 12vh, 140px); }
+  .section-head {
+    display: grid;
+    grid-template-columns: 1fr;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 48px;
+  }
+  .section-head h2 {
+    font-size: clamp(34px, 4.4vw, 56px);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.02;
+    color: var(--ink);
+  }
+  .section-head .line { transform-origin: left center; }
+
+  /* services */
+  .services { position: relative; overflow: hidden; }
+  .services .field {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+    pointer-events: none;
+  }
+  .services > .wrap { position: relative; }
+  .offers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(32px, 6vw, 96px);
+  }
+  .offer { position: relative; padding-bottom: 32px; border-bottom: 1px solid var(--rule); }
+  .offer .rule-draw {
+    position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+    background: var(--ink); transform-origin: left center; transform: scaleX(0);
+    opacity: 0.6;
+  }
+  .offer h3 {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+  .offer p { margin-top: 12px; font-size: 16px; color: var(--ink-soft); max-width: 44ch; }
+  .offer ul { list-style: none; margin: 24px 0 0; padding: 0; display: flex; flex-direction: column; }
+  .offer li {
+    padding: 12px 0;
+    border-top: 1px solid var(--rule-soft);
+    font-size: 16px;
+    color: var(--ink);
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .offer li::before { content: ''; flex: none; width: 5px; height: 5px; border-radius: 50%; background: var(--ink); }
+
+  /* method */
+  .method .section-head { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
+  .method-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    gap: clamp(32px, 6vw, 96px);
+  }
+  .method-side { position: sticky; top: 104px; align-self: start; }
+  .method-side .util { display: block; margin-bottom: 16px; }
+  .method-side h2 {
+    font-size: clamp(34px, 4.4vw, 56px);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.02;
+    color: var(--ink);
+  }
+  .method-side p { margin-top: 20px; font-size: 16px; max-width: 34ch; }
+  .steps {
+    --n-col: 56px;
+    --n-gap: 32px;
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--n-col) 1px minmax(0, 1fr);
+    column-gap: var(--n-gap);
+  }
+  .steps .track {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: calc(var(--n-col) + var(--n-gap));
+    width: 1px;
+    background: var(--rule);
+  }
+  .steps .marker {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--ink);
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 6px var(--paper);
+    will-change: transform, top;
+  }
+  .step { cursor: default; }
+  .step {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    padding-block: 36px;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .step:last-child { border-bottom: 0; }
+  .step .n {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--fog);
+    padding-top: 6px;
+    transition: color 200ms var(--ease);
+    font-variant-numeric: tabular-nums;
+  }
+  .step .body { grid-column: 3; }
+  .step h3 {
+    font-size: 28px; font-weight: 600; letter-spacing: -0.02em; color: var(--fog);
+    line-height: 1.1;
+    transition: color 200ms var(--ease);
+  }
+  .step p { margin-top: 10px; font-size: 16px; color: var(--ink-soft); max-width: 52ch; }
+  .step .fact { margin-top: 14px; }
+  .step.is-active .n, .step.is-active h3 { color: var(--ink); }
+
+  /* studio on ink */
+  .studio { background: var(--ink); color: var(--mist); }
+  .studio .util { color: rgba(245, 243, 238, 0.45); }
+  .studio-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: clamp(32px, 6vw, 96px);
+  }
+  .studio h2 {
+    font-size: clamp(36px, 5vw, 72px);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.0;
+    color: var(--paper);
+    max-width: 14ch;
+  }
+  .studio .statement { margin-top: 28px; font-size: 19px; line-height: 1.45; color: var(--mist); max-width: 44ch; }
+  /* one continuous line across the panel, 30° w to 45° e; the dot sits at aveiro's longitude (8.65° w) */
+  .geo { position: relative; margin-top: clamp(64px, 10vh, 120px); height: 72px; }
+  .geo-line {
+    position: absolute; left: 0; right: 0; top: 0;
+    height: 1px; background: rgba(245, 243, 238, 0.35);
+    transform-origin: left center;
+  }
+  .geo-ticks { position: absolute; left: 0; right: 0; top: 0; height: 16px; }
+  .geo-tick {
+    position: absolute; top: 0; width: 1px; height: 8px;
+    background: rgba(245, 243, 238, 0.32);
+    transform-origin: top center;
+  }
+  .geo-tick.major { height: 16px; background: rgba(245, 243, 238, 0.55); }
+  .geo-mark { position: absolute; top: 0; left: 28.47%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .geo-dot { display: block; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: var(--paper); box-shadow: 0 0 0 6px var(--ink); transform-origin: 50% 100%; position: relative; z-index: 1; }
+  .geo-label { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--mist); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .people { margin-top: 48px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 900px; }
+  .person { display: flex; gap: 14px; align-items: flex-start; }
+  .person .dot { flex: none; width: 10px; height: 10px; margin-top: 7px; border-radius: 50%; background: var(--paper); }
+  .person .name { font-size: 16px; font-weight: 500; color: var(--paper); }
+  .person .role { font-size: 13px; color: rgba(245, 243, 238, 0.55); margin-top: 2px; }
+  .person a { font-family: var(--mono); font-size: 12px; color: var(--mist); display: inline-block; margin-top: 8px; border-bottom: 1px solid var(--rule-on-ink); }
+  .person a:hover { border-color: var(--paper); }
+
+  /* brief */
+  .brief-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(32px, 6vw, 96px);
+  }
+  .brief-intro h2 {
+    font-size: clamp(34px, 4.4vw, 56px);
+    font-weight: 600; letter-spacing: -0.025em; line-height: 1.02; color: var(--ink);
+  }
+  .brief-intro .util { display: block; margin-bottom: 16px; }
+  .brief-intro p { margin-top: 20px; font-size: 16px; max-width: 38ch; }
+  .brief-intro .direct { margin-top: 28px; font-family: var(--mono); font-size: 13px; }
+  .brief-intro .direct a { color: var(--ink); border-bottom: 1px solid var(--rule); }
+  .form { display: grid; grid-template-columns: 1fr 1fr; gap: 28px 32px; }
+  .field { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .field.full { grid-column: 1 / -1; }
+  .field label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--fog); }
+  .field label .opt { text-transform: none; letter-spacing: 0; color: var(--fog); margin-left: 8px; }
+  .field input, .field textarea {
+    font-family: var(--sans);
+    font-size: 18px;
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--rule);
+    padding: 6px 0 10px;
+    border-radius: 0;
+    width: 100%;
+    transition: border-color 150ms var(--ease);
+    resize: vertical;
+  }
+  .field input::placeholder, .field textarea::placeholder { color: var(--fog); }
+  .field input:focus, .field textarea:focus { outline: none; border-bottom-color: var(--ink); }
+  .form-actions { grid-column: 1 / -1; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-top: 8px; }
+  .form-note { font-size: 13px; color: var(--fog); }
+  .form-sent { grid-column: 1 / -1; font-size: 15px; color: var(--ink-soft); }
+
+  /* footer */
+  footer { border-top: 1px solid var(--rule); padding-block: 48px 40px; }
+  .foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 32px; }
+  .foot-grid .lockup { font-size: 22px; }
+  .foot-grid .tag { margin-top: 10px; font-size: 14px; color: var(--ink-soft); }
+  .foot-col { display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+  .foot-col .util { margin-bottom: 4px; }
+  .foot-col a { color: var(--ink-soft); }
+  .foot-col a:hover { color: var(--ink); }
+  .foot-base {
+    margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--rule-soft);
+    display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    font-size: 13px; color: var(--fog);
+  }
+  /* footer column titles: plain lowercase, same face as the links */
+  .foot-col .util { font-family: var(--sans); font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--fog); }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 900px) {
+    .hero-grid, .method-grid, .studio-grid, .brief-grid { grid-template-columns: 1fr; }
+    .method-side { position: static; }
+    .section-head { grid-template-columns: 1fr; gap: 12px; }
+    .offers { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr 1fr; }
+    .steps { --n-col: 40px; --n-gap: 20px; }
+    .step h3 { font-size: 24px; }
+  }
+  @media (max-width: 600px) {
+    .nav { display: none; }
+    .hero h1 { font-size: clamp(64px, 22vw, 120px); }
+    .bits { grid-template-columns: repeat(16, 1fr); }
+    .form { grid-template-columns: 1fr; }
+    .people { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
 </style>
-<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
 </head>
 <body>
-<div id="root"></div>
+<header class="header" id="header">
+  <div class="wrap">
+    <a class="lockup" href="#top" aria-label="floating point, home">floating.</a>
+    <nav class="nav" aria-label="sections">
+      <a href="#services" data-i18n="nav1">services</a>
+      <a href="#method" data-i18n="nav2">method</a>
+      <a href="#studio" data-i18n="nav3">studio</a>
+      <a href="#brief" data-i18n="nav4">brief</a>
+    </nav>
+    <div class="head-actions">
+      <button class="lang" id="lang" type="button" aria-label="mudar para português">pt</button>
+      <a class="cta" href="#brief"><span data-i18n="cta">request a brief</span> <span class="dot" aria-hidden="true"></span></a>
+    </div>
+  </div>
+</header>
 
-<script type="text/babel" data-presets="react">
-const { useState, useEffect, useRef } = React;
-
-function Header({ current = "work", onNavigate }) {
-  const [scrolled, setScrolled] = useState(false);
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  const items = ["work", "services", "studio", "\n"];
-
-  return (
-    <header className={`fp-header ${scrolled ? "is-scrolled" : ""}`}>
-      <div className="fp-header__inner">
-        <a className="fp-lockup" href="#top" onClick={(e) => { e.preventDefault(); onNavigate?.("top"); }}>
-          floating<span className="fp-lockup__dot">.</span>
-        </a>
-        <nav className="fp-nav">
-          {items.map((it) => (
-            <a
-              key={it}
-              href={`#${it}`}
-              className={`fp-nav__link ${current === it ? "is-current" : ""}`}
-              onClick={(e) => { e.preventDefault(); onNavigate?.(it); }}
-            >
-              {it}
-            </a>
-          ))}
-        </nav>
-        <a
-          href="#contact"
-          className="fp-cta"
-          onClick={(e) => { e.preventDefault(); onNavigate?.("contact"); }}
-        >
-          request a brief →
-        </a>
+<main id="top">
+  <section class="hero" id="hero" aria-labelledby="hero-lead">
+    <div class="wrap hero-inner">
+      <h1 aria-label="floating.">
+        <span>floating</span><span class="period" id="period" aria-hidden="true"></span>
+      </h1>
+      <div class="hero-grid">
+        <div>
+          <p class="lead" id="hero-lead" data-lines data-i18n="lead">built to the last digit.</p>
+          <div class="actions" data-reveal>
+            <a class="cta" href="#brief"><span data-i18n="cta">request a brief</span> <span class="dot" aria-hidden="true"></span></a>
+            <a class="link" href="#method" data-i18n="how">how we work</a>
+          </div>
+        </div>
       </div>
+    </div>
+  </section>
+
+  <section class="section services" id="services" aria-labelledby="services-h">
+    <canvas class="field" id="field" aria-hidden="true"></canvas>
+    <div class="wrap">
+    <header class="section-head">
+      <h2 id="services-h" data-i18n="svc_h">what we do.</h2>
     </header>
-  );
-}
+    <div class="offers">
+      <article class="offer" data-row>
+        <h3>software</h3>
+        <p data-i18n="sw_p">we design, build and run software for companies of any size, from a first product to the systems a whole operation depends on.</p>
+        <ul>
+          <li data-i18n="sw1">web and mobile applications</li>
+          <li data-i18n="sw2">internal platforms and back-office tools</li>
+          <li data-i18n="sw3">integrations and apis</li>
+          <li data-i18n="sw4">data pipelines and reporting</li>
+          <li data-i18n="sw5">cloud infrastructure and devops</li>
+          <li data-i18n="sw6">maintenance and modernisation of existing systems</li>
+        </ul>
+        <span class="rule-draw" aria-hidden="true"></span>
+      </article>
+      <article class="offer" data-row>
+        <h3 data-i18n="cs_h">cybersecurity</h3>
+        <p data-i18n="cs_p">we find the weaknesses before someone else does, fix them, and keep watch afterwards.</p>
+        <ul>
+          <li data-i18n="cs1">security assessments and risk management</li>
+          <li data-i18n="cs2">hardening and compliance (iso 27001, nis2, gdpr)</li>
+          <li data-i18n="cs3">monitoring and threat detection</li>
+          <li data-i18n="cs4">incident response</li>
+          <li data-i18n="cs5">secure development and code review</li>
+          <li data-i18n="cs6">security training for teams</li>
+        </ul>
+        <span class="rule-draw" aria-hidden="true"></span>
+      </article>
+    </div>
+    </div>
+  </section>
 
-window.Header = Header;
-</script>
+  <section class="section wrap method" id="method" aria-labelledby="method-h">
+    <div class="method-grid">
+      <div class="method-side">
+        <h2 id="method-h" data-i18n="m_h">how a project runs.</h2>
+        <p data-i18n="m_p">three steps, in order.</p>
+      </div>
+      <div class="steps" id="steps">
+        <div class="track" aria-hidden="true"><span class="marker" id="marker"></span></div>
+        <article class="step is-active">
+          <span class="n">1</span>
+          <div class="body">
+            <h3 data-i18n="step1">brief</h3>
+            <p data-i18n="step1p">you send a paragraph. we reply within two working days with questions.</p>
+          </div>
+        </article>
+        <article class="step">
+          <span class="n">2</span>
+          <div class="body">
+            <h3 data-i18n="step2">scope</h3>
+            <p data-i18n="step2p">we write down what gets built, the price and the date. you sign it.</p>
+          </div>
+        </article>
+        <article class="step">
+          <span class="n">3</span>
+          <div class="body">
+            <h3 data-i18n="step3">build</h3>
+            <p data-i18n="step3p">we deliver in regular increments until it is in production, and stay for the fixes after.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
 
-<script type="text/babel" data-presets="react">
-function simulateBounce(name, SCALE) {
-  const o = {
-    holdBefore: 0.25,
-    fadeInDur: 0.18,
-    shortAntDur: 0.12,
-    finalAntDur: 0.36,
-    anticipationSquashY: 0.42,
-    startX: -640 * SCALE,
-    startY: -200 * SCALE,
-    launchVx: 490 * SCALE,
-    gravity: 2800 * SCALE,
-    restitution: 0.78,
-    friction: 0.78,
-    fps: 60,
-    maxBounces: 4,
-    settleThreshold: 80 * SCALE,
-    impactSquashFloor: 0.5,
-    stretchPerVel: 0.00055 / SCALE,
-    impactSquashCoef: 0.00045 / SCALE,
-    settleDur: 0.3,
-    holdAfter: 0.0,
+  <section class="section studio" id="studio" aria-labelledby="studio-h">
+    <div class="wrap">
+      <h2 id="studio-h" data-lines-dark data-i18n="st_h">three points define a plane.</h2>
+      <div class="people">
+        <div class="person"><span class="dot" aria-hidden="true"></span><div><div class="name">daniel ferreira</div><div class="role" data-i18n="role1">co-founder · managing partner</div></div></div>
+        <div class="person"><span class="dot" aria-hidden="true"></span><div><div class="name">vicente barros</div><div class="role" data-i18n="role2">co-founder</div></div></div>
+        <div class="person"><span class="dot" aria-hidden="true"></span><div><div class="name">sebastião teixeira</div><div class="role" data-i18n="role2">co-founder</div></div></div>
+      </div>
+    </div>
+    <div class="geo" id="geo" role="img" aria-label="aveiro, 40.6405 degrees north, 8.6538 degrees west">
+      <span class="geo-line" id="geo-line"></span>
+      <span class="geo-ticks" id="geo-ticks" aria-hidden="true"></span>
+      <span class="geo-mark" id="geo-mark">
+        <span class="geo-dot"></span>
+        <span class="geo-label">aveiro, 40.6405° n, 8.6538° w</span>
+      </span>
+    </div>
+  </section>
+
+  <section class="section wrap" id="brief" aria-labelledby="brief-h">
+    <div class="brief-grid">
+      <div class="brief-intro">
+        <h2 id="brief-h" data-i18n="b_h">tell us what you are building.</h2>
+        <p data-i18n="b_p">one paragraph is enough. what it is, what is hard about it, when you need it. we read everything ourselves and reply within two working days.</p>
+        <p class="direct"><span data-i18n="b_or">or write directly:</span> <a href="mailto:general@floatingpoint.pt">general@floatingpoint.pt</a></p>
+      </div>
+      <form class="form" id="form" novalidate>
+        <div class="field">
+          <label for="f-name" data-i18n="f_name">name</label>
+          <input id="f-name" name="name" type="text" required autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="f-email">email</label>
+          <input id="f-email" name="email" type="email" required autocomplete="email">
+        </div>
+        <div class="field full">
+          <label for="f-company"><span data-i18n="f_company">company</span> <span class="opt" data-i18n="f_opt">optional</span></label>
+          <input id="f-company" name="company" type="text" autocomplete="organization">
+        </div>
+        <div class="field full">
+          <label for="f-brief" data-i18n="f_brief">brief</label>
+          <textarea id="f-brief" name="brief" rows="5" required data-i18n-ph="f_ph" placeholder="what are you building, what is hard about it, when do you need it."></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="cta" type="submit"><span data-i18n="f_send">send the brief</span> <span class="dot" aria-hidden="true"></span></button>
+          <span class="form-note" id="form-note" data-i18n="f_note">opens in your mail client. nothing is stored here.</span>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="lockup">floating.</div>
+        <p class="tag" data-i18n="ft_tag">software and cybersecurity, aveiro.</p>
+      </div>
+      <div class="foot-col">
+        <span class="util" data-i18n="ft_site">site</span>
+        <a href="#services" data-i18n="nav1">services</a>
+        <a href="#method" data-i18n="nav2">method</a>
+        <a href="#studio" data-i18n="nav3">studio</a>
+        <a href="#brief" data-i18n="nav4">brief</a>
+      </div>
+      <div class="foot-col">
+        <span class="util" data-i18n="ft_contact">contact</span>
+        <a href="mailto:daniel@floatingpoint.pt">daniel@floatingpoint.pt</a>
+        <a href="mailto:vicente@floatingpoint.pt">vicente@floatingpoint.pt</a>
+        <a href="mailto:sebastiao@floatingpoint.pt">sebastiao@floatingpoint.pt</a>
+        <span>aveiro, portugal</span>
+      </div>
+      <div class="foot-col">
+        <span class="util" data-i18n="ft_else">elsewhere</span>
+        <a href="https://github.com/dferrero17" rel="noopener">github</a>
+        <a href="https://floatingpoint.pt" rel="noopener">floatingpoint.pt</a>
+      </div>
+    </div>
+    <div class="foot-base">
+      <span>floating point lda, aveiro</span>
+      <span>2026</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/SplitText.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.11/dist/lenis.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ------------------------------------------------------------------
+     brief form: compose a mailto, nothing leaves the page otherwise
+     ------------------------------------------------------------------ */
+  /* ------------------------------------------------------------------
+     language. english is what the markup says; portuguese is the table.
+     ------------------------------------------------------------------ */
+  const PT = {
+    nav1: 'serviços', nav2: 'método', nav3: 'estúdio', nav4: 'briefing',
+    cta: 'pedir um briefing', lead: 'feito até ao último dígito.', how: 'como trabalhamos',
+    svc_h: 'o que fazemos.',
+    sw_p: 'desenhamos, construímos e operamos software para empresas de qualquer dimensão, do primeiro produto aos sistemas de que toda a operação depende.',
+    sw1: 'aplicações web e mobile', sw2: 'plataformas internas e ferramentas de back-office', sw3: 'integrações e apis',
+    sw4: 'pipelines de dados e reporting', sw5: 'infraestrutura cloud e devops', sw6: 'manutenção e modernização de sistemas existentes',
+    cs_h: 'cibersegurança',
+    cs_p: 'encontramos as fragilidades antes de outros as encontrarem, corrigimo-las e mantemos a vigilância depois.',
+    cs1: 'avaliações de segurança e gestão de risco', cs2: 'hardening e conformidade (iso 27001, nis2, rgpd)', cs3: 'monitorização e deteção de ameaças',
+    cs4: 'resposta a incidentes', cs5: 'desenvolvimento seguro e revisão de código', cs6: 'formação em segurança para equipas',
+    m_h: 'como corre um projeto.', m_p: 'três passos, por ordem.',
+    step1: 'briefing', step1p: 'envias-nos um parágrafo. respondemos em dois dias úteis, com perguntas.',
+    step2: 'âmbito', step2p: 'escrevemos o que vai ser construído, o preço e a data. assinas.',
+    step3: 'construção', step3p: 'entregamos em incrementos regulares até estar em produção, e ficamos para as correções depois.',
+    st_h: 'três pontos definem um plano.', role1: 'cofundador · sócio-gerente', role2: 'cofundador',
+    b_h: 'conta-nos o que estás a construir.',
+    b_p: 'um parágrafo chega. o que é, o que tem de difícil, quando precisas. lemos tudo nós próprios e respondemos em dois dias úteis.',
+    b_or: 'ou escreve diretamente:', f_name: 'nome', f_company: 'empresa', f_opt: 'opcional', f_brief: 'briefing',
+    f_ph: 'o que estás a construir, o que tem de difícil, quando precisas.', f_send: 'enviar o briefing',
+    f_note: 'abre no teu cliente de email. nada fica guardado aqui.',
+    ft_tag: 'software e cibersegurança, aveiro.', ft_site: 'site', ft_contact: 'contacto', ft_else: 'outros',
+    // runtime strings
+    need: 'nome, email e o briefing são necessários.',
+    handed: 'entregue ao teu cliente de email. se nada abriu, escreve para general@floatingpoint.pt.',
+    subject: 'briefing de '
   };
+  const EN = { need: 'name, email and the brief are needed.', handed: 'handed to your mail client. if nothing opened, write to general@floatingpoint.pt.', subject: 'brief from ' };
+  const i18nNodes = document.querySelectorAll('[data-i18n]');
+  i18nNodes.forEach(n => { n.dataset.en = n.textContent; });
+  document.querySelectorAll('[data-i18n-ph]').forEach(n => { n.dataset.en = n.getAttribute('placeholder'); });
+  let lang = 'en';
+  try { lang = localStorage.getItem('fp-lang') === 'pt' ? 'pt' : 'en'; } catch (e) {}
+  const langBtn = document.getElementById('lang');
+  const splits = [];   // SplitText instances get reverted before text changes
+  function setLang(l) {
+    lang = l;
+    splits.forEach(sp => { try { sp.revert(); } catch (e) {} });
+    splits.length = 0;
+    i18nNodes.forEach(n => { n.textContent = l === 'pt' ? (PT[n.dataset.i18n] || n.dataset.en) : n.dataset.en; });
+    document.querySelectorAll('[data-i18n-ph]').forEach(n => { n.setAttribute('placeholder', l === 'pt' ? PT[n.dataset.i18nPh] : n.dataset.en); });
+    langBtn.textContent = l === 'pt' ? 'en' : 'pt';
+    langBtn.setAttribute('aria-label', l === 'pt' ? 'switch to english' : 'mudar para português');
+    document.documentElement.lang = l === 'pt' ? 'pt-PT' : 'en';
+    try { localStorage.setItem('fp-lang', l); } catch (e) {}
+  }
+  if (lang === 'pt') setLang('pt');
+  langBtn.addEventListener('click', () => setLang(lang === 'pt' ? 'en' : 'pt'));
+  const T = () => (lang === 'pt' ? PT : EN);
 
-  const samples = [];
-  let t = 0;
-  samples.push({ t: 0, x: o.startX, y: o.startY, sx: 1, sy: 1, op: 0 });
-  samples.push({ t: o.holdBefore - 0.001, x: o.startX, y: o.startY, sx: 1, sy: 1, op: 0 });
-  t = o.holdBefore;
+  const form = document.getElementById('form');
+  const note = document.getElementById('form-note');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = new FormData(form);
+    const name = (f.get('name') || '').toString().trim();
+    const email = (f.get('email') || '').toString().trim();
+    const company = (f.get('company') || '').toString().trim();
+    const brief = (f.get('brief') || '').toString().trim();
+    if (!name || !email || !brief) { note.textContent = T().need; return; }
+    const subject = T().subject + name + (company ? ' · ' + company : '');
+    const body = brief + '\n\n' + name + '\n' + email + (company ? '\n' + company : '');
+    window.location.href = 'mailto:general@floatingpoint.pt?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    note.textContent = T().handed;
+  });
 
-  const dt = 1 / o.fps;
-  let x = o.startX, y = o.startY, vx = o.launchVx, vy = 0;
-  let bounces = 0, done = false;
-
-  while (!done && t < 12) {
-    vy += o.gravity * dt;
-    x += vx * dt;
-    y += vy * dt;
-
-    if (y >= 0) {
-      y = 0;
-      const impactSpeed = Math.abs(vy);
-      const sy_imp = Math.max(o.impactSquashFloor, 1 - impactSpeed * o.impactSquashCoef);
-      const sx_imp = 1 + (1 - sy_imp) * 0.7;
-      samples.push({ t, x, y: 0, sx: sx_imp, sy: sy_imp, impact: true });
-
-      vy = -impactSpeed * o.restitution;
-      vx *= o.friction;
-      bounces++;
-
-      if (Math.abs(vy) < o.settleThreshold || bounces >= o.maxBounces) {
-        done = true;
-        continue;
-      }
-
-      const isFinalWindup = (bounces === o.maxBounces - 1);
-      const antDur = isFinalWindup ? o.finalAntDur : o.shortAntDur;
-      const deepSquash = Math.max(o.anticipationSquashY, sy_imp - (isFinalWindup ? 0.12 : 0.05));
-      const antFrames = Math.round(antDur * o.fps);
-      for (let ii = 1; ii <= antFrames; ii++) {
-        const uu = ii / antFrames;
-        const ee = isFinalWindup
-          ? uu * uu
-          : (uu < 0.5 ? 4 * uu * uu * uu : 1 - Math.pow(-2 * uu + 2, 3) / 2);
-        const sy_a = sy_imp + (deepSquash - sy_imp) * ee;
-        const sx_a = 1 + (1 - sy_a) * 0.7;
-        samples.push({ t: t + antDur * uu, x, y: 0, sx: sx_a, sy: sy_a });
-      }
-      t += antDur;
-
-      samples.push({ t, x, y: 0, sx: 0.85, sy: 1.18, impact: true });
-      continue;
-    }
-
-    const spd = Math.abs(vy);
-    const sy_f = 1 + spd * o.stretchPerVel;
-    const sx_f = 2 - sy_f;
-    samples.push({ t, x, y, sx: sx_f, sy: sy_f });
-    t += dt;
+  /* ------------------------------------------------------------------
+     the line: 30° w to 45° e, a tick every 5 degrees, a taller one every 15
+     ------------------------------------------------------------------ */
+  const ticksEl = document.getElementById('geo-ticks');
+  for (let deg = -30; deg <= 45; deg += 5) {
+    const t = document.createElement('span');
+    t.className = 'geo-tick' + (deg % 15 === 0 ? ' major' : '');
+    t.style.left = ((deg + 30) / 75 * 100) + '%';
+    ticksEl.appendChild(t);
   }
 
-  const last = samples[samples.length - 1];
-  const startSx = last.sx, startSy = last.sy, startXSettle = last.x;
-  const settleFrames = Math.round(o.settleDur * o.fps);
-  for (let j = 1; j <= settleFrames; j++) {
-    const u2 = j / settleFrames;
-    const e2 = 1 - Math.pow(1 - u2, 3);
-    samples.push({
-      t: t + o.settleDur * u2,
-      x: startXSettle * (1 - e2),
-      y: 0,
-      sx: startSx + (1 - startSx) * e2,
-      sy: startSy + (1 - startSy) * e2,
+  /* ------------------------------------------------------------------
+     header hairline
+     ------------------------------------------------------------------ */
+  const header = document.getElementById('header');
+  function onScroll(y) { header.classList.toggle('is-scrolled', y > 8); }
+  window.addEventListener('scroll', () => onScroll(window.scrollY), { passive: true });
+
+  /* ------------------------------------------------------------------
+     motion. all of it is skipped under prefers-reduced-motion.
+     ------------------------------------------------------------------ */
+  if (reduced || !window.gsap) return;
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+
+  // smooth scroll
+  let lenis = null;
+  if (window.Lenis) {
+    lenis = new Lenis({ lerp: 0.11, smoothWheel: true });
+    lenis.on('scroll', (e) => { ScrollTrigger.update(); onScroll(e.scroll); });
+    gsap.ticker.add((t) => lenis.raf(t * 1000));
+    gsap.ticker.lagSmoothing(0);
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (ev) => {
+        const id = a.getAttribute('href');
+        const target = id === '#top' ? 0 : document.querySelector(id);
+        if (target === null) return;
+        ev.preventDefault();
+        lenis.scrollTo(target, { offset: -64, duration: 1.1 });
+      });
     });
   }
-  t += o.settleDur;
-  samples.push({ t, x: 0, y: 0, sx: 1, sy: 1 });
 
-  const duration = samples[samples.length - 1].t;
-  const stride = 2;
-  const fadeEnd = o.holdBefore + o.fadeInDur;
-  const lines = [];
-  for (let k = 0; k < samples.length; k++) {
-    if (k !== 0 && k !== samples.length - 1 && k % stride !== 0 && !samples[k].impact) continue;
-    const s = samples[k];
-    const pct = ((s.t / duration) * 100).toFixed(2);
-    const op = (s.op !== undefined) ? s.op
-      : (s.t >= fadeEnd ? 1 : Math.max(0, (s.t - o.holdBefore) / o.fadeInDur));
-    lines.push(`${pct}% { opacity: ${op.toFixed(2)}; transform: translate(${s.x.toFixed(1)}px, ${s.y.toFixed(1)}px) scale(${s.sx.toFixed(3)}, ${s.sy.toFixed(3)}); }`);
+  // the field. points drift in three depths behind the services, shift with the
+  // cursor, slide with the scroll, and settle into a grid as you read through.
+  const fieldHost = document.getElementById('services');
+  const canvas = document.getElementById('field');
+  const ctx = canvas.getContext('2d');
+  const coarse = window.matchMedia('(pointer: coarse)').matches;
+  const field = { w: 0, h: 0, dpr: 1, p: 0, mx: 0, my: 0, tx: 0, ty: 0, dots: [], t: 0 };
+
+  function sizeField() {
+    const r = fieldHost.getBoundingClientRect();
+    field.dpr = Math.min(2, window.devicePixelRatio || 1);
+    field.w = r.width; field.h = r.height;
+    canvas.width = Math.round(r.width * field.dpr);
+    canvas.height = Math.round(r.height * field.dpr);
+    ctx.setTransform(field.dpr, 0, 0, field.dpr, 0, 0);
+    // one point per grid cell; the grid is where they end up
+    const cell = coarse ? 92 : 76;
+    const cols = Math.max(4, Math.floor(r.width / cell));
+    const rows = Math.max(4, Math.floor(r.height / cell));
+    const n = Math.min(220, cols * rows);
+    const ox = (r.width - (cols - 1) * cell) / 2, oy = (r.height - (rows - 1) * cell) / 2;
+    const keep = field.dots;
+    field.dots = [];
+    for (let i = 0; i < n; i++) {
+      const prev = keep[i];
+      const z = [0.35, 0.65, 1][i % 3];
+      field.dots.push({
+        x: prev ? prev.x : Math.random(), y: prev ? prev.y : Math.random(), z,
+        gx: ox + (i % cols) * cell, gy: oy + Math.floor(i / cols) * cell,
+        r: 0.9 + z * 1.5, a: 0.12 + z * 0.26,
+        ph: prev ? prev.ph : Math.random() * Math.PI * 2,
+        sp: prev ? prev.sp : 0.004 + Math.random() * 0.006,
+        amp: prev ? prev.amp : 0.004 + Math.random() * 0.008,
+        vx: prev ? prev.vx : (Math.random() - 0.5) * 0.004
+      });
+    }
   }
-  return {
-    keyframes: `@keyframes ${name} {\n  ${lines.join("\n  ")}\n}`,
-    duration,
-  };
-}
+  const smooth = (u) => { u = Math.min(1, Math.max(0, u)); return u * u * (3 - 2 * u); };
+  function drawField(dt) {
+    field.t += dt;
+    field.mx += (field.tx - field.mx) * 0.06;
+    field.my += (field.ty - field.my) * 0.06;
+    const p = field.p;
+    const k = smooth((p - 0.25) / 0.45);          // scatter -> grid through the middle of the section
+    const fade = smooth(p / 0.12) * (1 - smooth((p - 0.9) / 0.1));
+    ctx.clearRect(0, 0, field.w, field.h);
+    ctx.fillStyle = '#2a2730';
+    for (const d of field.dots) {
+      d.x += d.vx * dt; if (d.x < -0.02) d.x = 1.02; if (d.x > 1.02) d.x = -0.02;
+      const wob = Math.sin(field.t * d.sp * 60 + d.ph) * d.amp;
+      const fx = (d.x + wob) * field.w + field.mx * d.z * 26;
+      const fy = (d.y + wob * 0.6) * field.h + field.my * d.z * 16 - (p - 0.5) * 140 * d.z;
+      const x = fx + (d.gx + field.mx * 8 - fx) * k;
+      const y = fy + (d.gy - fy) * k;
+      const a = d.a * fade * (1 - k * 0.35);
+      if (a <= 0.005) continue;
+      ctx.globalAlpha = a;
+      ctx.beginPath();
+      ctx.arc(x, y, d.r * (1 - k * 0.3), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+  sizeField();
+  let fieldVisible = false;
+  new IntersectionObserver((es) => { fieldVisible = es[0].isIntersecting; }).observe(fieldHost);
+  gsap.ticker.add((t, dtMs) => { if (fieldVisible) drawField(Math.min(0.05, dtMs / 1000)); });
+  if (!coarse) {
+    window.addEventListener('pointermove', (e) => {
+      field.tx = (e.clientX / window.innerWidth - 0.5) * 2;
+      field.ty = (e.clientY / window.innerHeight - 0.5) * 2;
+    }, { passive: true });
+  }
+  window.addEventListener('resize', () => { sizeField(); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { sizeField(); ScrollTrigger.refresh(); });
+  const servicesText = fieldHost.querySelector('.wrap');
+  gsap.timeline({
+    scrollTrigger: {
+      trigger: fieldHost, start: 'top bottom', end: 'bottom top', scrub: 0.4,
+      onUpdate: (st) => { field.p = st.progress; }, onRefresh: sizeField
+    }
+  })
+    .fromTo(servicesText, { opacity: 0, scale: 0.94, y: 60 }, { opacity: 1, scale: 1, y: 0, ease: 'none', duration: 0.28 }, 0.02)
+    .to(servicesText, { opacity: 0, scale: 0.62, y: -80, transformOrigin: '50% 30%', ease: 'none', duration: 0.3 }, 0.68);
 
-function Hero() {
-  const headlineRef = useRef(null);
-  const styleRef = useRef(null);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    const h1 = headlineRef.current;
-    if (!h1) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    const FS = parseFloat(getComputedStyle(h1).fontSize) || 96;
-    const SCALE = FS / 160;
-
-    const id = `fp-hero-bounce-${Math.random().toString(36).slice(2, 8)}`;
-    const sim = simulateBounce(id, SCALE);
-
-    const css = `
-      ${sim.keyframes}
-      .fp-hero__period-bouncer {
-        width: ${(33 * SCALE).toFixed(2)}px;
-        height: ${(33 * SCALE).toFixed(2)}px;
-        margin-left: ${(9 * SCALE).toFixed(2)}px;
-        opacity: 0;
-        transform: translate(${(-640 * SCALE).toFixed(1)}px, ${(-200 * SCALE).toFixed(1)}px);
-        ${reduced ? "" : `animation: ${id} ${sim.duration.toFixed(2)}s linear 1 forwards;`}
+  // the bounce. brand physics: gravity 2800, restitution 0.78, friction 0.78,
+  // integrated at load and played once. values in em of the wordmark.
+  function simulateBounce(scale) {
+    const o = {
+      holdBefore: 0.25, shortAntDur: 0.12, finalAntDur: 0.36, anticipationSquashY: 0.42,
+      startX: -640 * scale, startY: -200 * scale, launchVx: 490 * scale,
+      gravity: 2800 * scale, restitution: 0.78, friction: 0.78, fps: 120, maxBounces: 4,
+      settleThreshold: 80 * scale, impactSquashFloor: 0.5,
+      stretchPerVel: 0.00055 / scale, impactSquashCoef: 0.00045 / scale, settleDur: 0.3,
+    };
+    const S = [];
+    S.push({ t: 0, x: o.startX, y: o.startY, sx: 1, sy: 1, op: 0 });
+    S.push({ t: o.holdBefore - 0.001, x: o.startX, y: o.startY, sx: 1, sy: 1, op: 0 });
+    let t = o.holdBefore, dt = 1 / o.fps;
+    let x = o.startX, y = o.startY, vx = o.launchVx, vy = 0, bounces = 0, done = false;
+    while (!done && t < 12) {
+      vy += o.gravity * dt; x += vx * dt; y += vy * dt;
+      if (y >= 0) {
+        y = 0;
+        const imp = Math.abs(vy);
+        const syI = Math.max(o.impactSquashFloor, 1 - imp * o.impactSquashCoef);
+        S.push({ t, x, y: 0, sx: 1 + (1 - syI) * 0.7, sy: syI, op: 1 });
+        vy = -imp * o.restitution; vx *= o.friction; bounces++;
+        if (Math.abs(vy) < o.settleThreshold || bounces >= o.maxBounces) { done = true; continue; }
+        const finalWind = bounces === o.maxBounces - 1;
+        const antDur = finalWind ? o.finalAntDur : o.shortAntDur;
+        const deep = Math.max(o.anticipationSquashY, syI - (finalWind ? 0.12 : 0.05));
+        const n = Math.round(antDur * o.fps);
+        for (let i = 1; i <= n; i++) {
+          const u = i / n;
+          const e = finalWind ? u * u : (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
+          const sy = syI + (deep - syI) * e;
+          S.push({ t: t + antDur * u, x, y: 0, sx: 1 + (1 - sy) * 0.7, sy, op: 1 });
+        }
+        t += antDur;
+        S.push({ t, x, y: 0, sx: 0.85, sy: 1.18, op: 1 });
+        continue;
       }
-      ${reduced ? `.fp-hero__period-bouncer { opacity: 1; transform: none; }` : ""}
-    `;
-    const style = document.createElement("style");
-    style.textContent = css;
-    document.head.appendChild(style);
-    styleRef.current = style;
-    setReady(true);
-    return () => { style.remove(); };
-  }, []);
+      const sy = 1 + Math.abs(vy) * o.stretchPerVel;
+      S.push({ t, x, y, sx: 2 - sy, sy, op: 1 });
+      t += dt;
+    }
+    const last = S[S.length - 1];
+    const n = Math.round(o.settleDur * o.fps);
+    for (let j = 1; j <= n; j++) {
+      const u = j / n, e = 1 - Math.pow(1 - u, 3);
+      S.push({ t: t + o.settleDur * u, x: last.x * (1 - e), y: 0, sx: last.sx + (1 - last.sx) * e, sy: last.sy + (1 - last.sy) * e, op: 1 });
+    }
+    t += o.settleDur;
+    S.push({ t, x: 0, y: 0, sx: 1, sy: 1, op: 1 });
+    return { samples: S, duration: t };
+  }
 
-  return (
-    <section className="fp-hero" id="top">
-      <div className="fp-hero__util">engineering solutions · est. 2026</div>
-      <h1 className="fp-hero__headline" ref={headlineRef}>
-        <span className="fp-hero__lockup">
-          <span className="fp-hero__word">floating</span>
-          <span className="fp-hero__period-bouncer" aria-hidden="true" />
-        </span>
-      </h1>
-      <p className="fp-hero__lead">
-        engineering that lands where you put it. tight-tolerance systems for teams that don't accept drift. predictable cost. predictable timelines.
-      </p>
-      <div className="fp-hero__actions">
-        <a className="fp-cta" href="#contact">request a brief →</a>
-        <a className="fp-link" href="#work">see selected work →</a>
-      </div>
-    </section>
-  );
-}
+  const period = document.getElementById('period');
+  const h1 = period.parentElement;
+  const fs = parseFloat(getComputedStyle(h1).fontSize) || 160;
+  const sim = simulateBounce(fs / 160);
+  const boot = gsap.timeline();
 
-window.Hero = Hero;
+  gsap.set(period, { opacity: 0, x: sim.samples[0].x, y: sim.samples[0].y });
+  boot.to({ p: 0 }, {
+    p: 1, duration: sim.duration, ease: 'none',
+    onUpdate() {
+      const tt = this.progress() * sim.duration;
+      const S = sim.samples;
+      let i = 1;
+      while (i < S.length - 1 && S[i].t < tt) i++;
+      const a = S[i - 1], b = S[i];
+      const u = b.t === a.t ? 1 : Math.min(1, Math.max(0, (tt - a.t) / (b.t - a.t)));
+      const mix = (k) => a[k] + (b[k] - a[k]) * u;
+      gsap.set(period, { x: mix('x'), y: mix('y'), scaleX: mix('sx'), scaleY: mix('sy'), opacity: mix('op') });
+    },
+    onComplete() { gsap.set(period, { clearProps: 'all' }); }
+  }, 0);
+
+  // type comes in after the dot lands: lines rise in masks
+  const splitTargets = document.querySelectorAll('.hero [data-lines]');
+  const heroSplit = SplitText.create(splitTargets, { type: 'lines', mask: 'lines', linesClass: 'ln' });
+  splits.push(heroSplit);
+  boot.from(heroSplit.lines, { yPercent: 110, duration: 0.9, ease: 'power3.out', stagger: 0.06 }, Math.max(0.6, sim.duration - 0.8));
+  boot.from(document.querySelectorAll('.hero [data-reveal]'), { opacity: 0, y: 8, duration: 0.6, ease: 'power2.out', stagger: 0.08 }, '<0.3');
+
+  // section heads: the rule under the heading draws once
+  document.querySelectorAll('.section-head').forEach((head) => {
+    gsap.from(head, {
+      scrollTrigger: { trigger: head, start: 'top 85%', once: true },
+      opacity: 0, y: 10, duration: 0.7, ease: 'power2.out'
+    });
+  });
+
+  // method: the dot is the status indicator. it sits on the step you are reading
+  // and hops to whichever step you hover, with the brand's squash and stretch.
+  const steps = gsap.utils.toArray('.step');
+  const stepsEl = document.getElementById('steps');
+  const marker = document.getElementById('marker');
+  const track = stepsEl.querySelector('.track');
+  gsap.set(marker, { xPercent: -50, yPercent: -50, transformOrigin: '50% 100%' });
+  let scrollStep = steps[0], hoverStep = null, hop = null;
+  function stepY(step) {
+    const h = step.querySelector('h3').getBoundingClientRect();
+    return h.top + h.height / 2 - track.getBoundingClientRect().top;
+  }
+  function markerTo(step, animate) {
+    steps.forEach(x => x.classList.toggle('is-active', x === step));
+    const y = stepY(step);
+    if (hop) hop.kill();
+    if (!animate) { gsap.set(marker, { top: y, scaleX: 1, scaleY: 1 }); return; }
+    const dist = Math.abs(y - parseFloat(gsap.getProperty(marker, 'top')));
+    const dur = gsap.utils.clamp(0.35, 0.7, dist / 500);
+    hop = gsap.timeline()
+      .to(marker, { scaleY: 0.72, scaleX: 1.22, duration: 0.1, ease: 'power2.in' }, 0)          // anticipation
+      .to(marker, { top: y, duration: dur, ease: 'power2.inOut' }, 0.1)                           // travel
+      .to(marker, { scaleY: 1.3, scaleX: 0.84, duration: dur * 0.5, ease: 'power2.out' }, 0.1)  // stretch in flight
+      .to(marker, { scaleY: 0.6, scaleX: 1.35, duration: 0.09, ease: 'power2.in' }, 0.1 + dur)  // impact
+      .to(marker, { scaleY: 1, scaleX: 1, duration: 0.5, ease: 'elastic.out(1.1, 0.45)' }, 0.19 + dur);
+  }
+  markerTo(steps[0], false);
+  steps.forEach((step) => {
+    step.addEventListener('pointerenter', () => { hoverStep = step; markerTo(step, true); });
+    ScrollTrigger.create({
+      trigger: step, start: 'top 55%', end: 'bottom 55%',
+      onToggle: (st) => { if (st.isActive) { scrollStep = step; if (!hoverStep) markerTo(step, true); } }
+    });
+  });
+  stepsEl.addEventListener('pointerleave', () => { hoverStep = null; markerTo(scrollStep, true); });
+  ScrollTrigger.addEventListener('refresh', () => markerTo(hoverStep || scrollStep, false));
+
+  // studio: statement lines rise on ink
+  const darkSplit = SplitText.create('[data-lines-dark]', { type: 'lines', mask: 'lines' });
+  splits.push(darkSplit);
+  gsap.from(darkSplit.lines, {
+    scrollTrigger: { trigger: '.studio', start: 'top 70%', once: true },
+    yPercent: 110, duration: 0.9, ease: 'power3.out', stagger: 0.07
+  });
+
+  // studio: the line draws across, then the aveiro mark lands on it
+  const DRAW = 2.2;
+  gsap.timeline({ scrollTrigger: { trigger: '#geo', start: 'top 80%', once: true } })
+    .from('#geo-line', { scaleX: 0, duration: DRAW, ease: 'power2.inOut' }, 0)
+    .from('.geo-tick', { scaleY: 0, opacity: 0, duration: 0.5, ease: 'power2.out',
+      stagger: { each: DRAW / 16, ease: 'power2.inOut' } }, 0.05)
+    .from('#geo-mark .geo-dot', { y: -36, opacity: 0, scaleY: 1.3, scaleX: 0.8, duration: 0.55, ease: 'power2.in' }, DRAW * 0.2847 + 0.05)
+    .to('#geo-mark .geo-dot', { scaleY: 0.7, scaleX: 1.3, duration: 0.1, ease: 'power2.in' }, '>')
+    .to('#geo-mark .geo-dot', { scaleY: 1, scaleX: 1, duration: 0.6, ease: 'elastic.out(1.1, 0.45)' }, '>')
+    .from('#geo-mark .geo-label', { opacity: 0, y: 8, duration: 0.7, ease: 'power2.out' }, '<0.1');
+
+  // brief form: fields settle in
+  gsap.from('.form .field, .form .form-actions', {
+    scrollTrigger: { trigger: '.form', start: 'top 80%', once: true },
+    opacity: 0, y: 10, duration: 0.6, stagger: 0.06, ease: 'power2.out'
+  });
+
+  // re-split on resize so masks match the new line breaks
+  let rt;
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => ScrollTrigger.refresh(), 150); });
+})();
 </script>
 
-<script type="text/babel" data-presets="react">
-const SERVICES = [
-  { n: "01", title: "lorem ipsum", body: "lorem ipsum dolor sit amet, consectetur adipiscing elit. sed do eiusmod tempor incididunt." },
-  { n: "02", title: "dolor sit amet", body: "ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip." },
-  { n: "03", title: "consectetur", body: "duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore." },
-  { n: "04", title: "adipiscing elit", body: "excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt." },
-];
-
-function Services() {
-  return (
-    <section className="fp-services" id="services">
-      <header className="fp-section__header">
-        <span className="fp-section__util">02 · services</span>
-        <h2 className="fp-section__heading">what we ship.</h2>
-      </header>
-      <div className="fp-services__list">
-        {SERVICES.map((s) => (
-          <article key={s.n} className="fp-service">
-            <div className="fp-service__n">{s.n}</div>
-            <h3 className="fp-service__title">{s.title}</h3>
-            <p className="fp-service__body">{s.body}</p>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-window.Services = Services;
-</script>
-
-<script type="text/babel" data-presets="react">
-const CASES = [
-  { n: "042", title: "lorem ipsum dolor", client: "lorem ipsum", year: "2025", tag: "platform",
-    body: "lorem ipsum dolor sit amet, consectetur adipiscing elit. sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." },
-  { n: "037", title: "consectetur adipiscing", client: "dolor sit amet", year: "2024", tag: "internal",
-    body: "ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." },
-  { n: "031", title: "duis aute irure", client: "reprehenderit in voluptate", year: "2024", tag: "applied numerics",
-    body: "duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur." },
-  { n: "025", title: "excepteur sint occaecat", client: "sunt in culpa", year: "2023", tag: "platform",
-    body: "excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." },
-];
-
-function Cases({ onSelect }) {
-  return (
-    <section className="fp-cases" id="work">
-      <header className="fp-section__header">
-        <span className="fp-section__util">01 · selected work</span>
-        <h2 className="fp-section__heading">recent.</h2>
-      </header>
-      <div className="fp-cases__grid">
-        {CASES.map((c) => (
-          <article key={c.n} className="fp-case" onClick={() => onSelect?.(c)} tabIndex={0} role="button">
-            <div className="fp-case__head">
-              <span className="fp-case__n">case · {c.n}</span>
-              <span className="fp-case__year">{c.year}</span>
-            </div>
-            <h3 className="fp-case__title">{c.title}.</h3>
-            <p className="fp-case__client">{c.client}</p>
-            <p className="fp-case__body">{c.body}</p>
-            <div className="fp-case__foot">
-              <span className="fp-tag">{c.tag}</span>
-              <span className="fp-case__more">read →</span>
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-window.Cases = Cases;
-</script>
-
-<script type="text/babel" data-presets="react">
-function Studio() {
-  return (
-    <section className="fp-studio" id="studio">
-      <div className="fp-studio__inner">
-        <header className="fp-section__header fp-section__header--inverted">
-          <span className="fp-section__util">03 · studio</span>
-          <h2 className="fp-section__heading">small. quiet. fixed-scope.</h2>
-        </header>
-        <div className="fp-studio__cols">
-          <div>
-            <p className="fp-studio__lead">
-              floating point is a two-person engineering studio in aveiro. we ship work for teams that don't accept drift.
-            </p>
-          </div>
-          <div className="fp-studio__meta">
-            <dl>
-              <div><dt>founded</dt><dd>2026</dd></div>
-              <div><dt>office</dt><dd>aveiro</dd></div>
-            </dl>
-          </div>
-        </div>
-        <div className="fp-studio__people">
-          <div className="fp-person"><div className="fp-person__avatar" /><div><div className="fp-person__name">vicente barros</div><div className="fp-person__role">co-founder</div></div></div>
-          <div className="fp-person"><div className="fp-person__avatar" /><div><div className="fp-person__name">daniel ferreira</div><div className="fp-person__role">co-founder</div></div></div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-window.Studio = Studio;
-</script>
-
-<script type="text/babel" data-presets="react">
-function Contact() {
-  const [submitted, setSubmitted] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", company: "", brief: "" });
-
-  const onSubmit = (e) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
-
-  return (
-    <section className="fp-contact" id="contact">
-      <header className="fp-section__header">
-        <span className="fp-section__util">04 · request a brief</span>
-        <h2 className="fp-section__heading">tell us what you're building.</h2>
-      </header>
-
-      {submitted ? (
-        <div className="fp-contact__done">
-          <p className="fp-contact__done-lead">received.</p>
-          <p>we read everything. we reply within two working days, usually one.</p>
-          <button className="fp-cta fp-cta--ghost" onClick={() => { setSubmitted(false); setForm({ name: "", email: "", company: "", brief: "" }); }}>
-            send another
-          </button>
-        </div>
-      ) : (
-        <form className="fp-form" onSubmit={onSubmit}>
-          <div className="fp-form__row">
-            <div className="fp-field">
-              <label>name</label>
-              <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="cole rafferty" />
-            </div>
-            <div className="fp-field">
-              <label>email</label>
-              <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="cole@floatingpoint.io" />
-            </div>
-          </div>
-          <div className="fp-field">
-            <label>company</label>
-            <input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} placeholder="optional" />
-          </div>
-          <div className="fp-field">
-            <label>brief</label>
-            <textarea required rows="5" value={form.brief} onChange={(e) => setForm({ ...form, brief: e.target.value })} placeholder="one paragraph is fine. what are you building, what is hard about it, when do you need it." />
-          </div>
-          <div className="fp-form__actions">
-            <button type="submit" className="fp-cta">send →</button>
-            <span className="fp-form__note">or write directly: cole@floatingpoint.io</span>
-          </div>
-        </form>
-      )}
-    </section>
-  );
-}
-
-window.Contact = Contact;
-</script>
-
-<script type="text/babel" data-presets="react">
-function Footer() {
-  return (
-    <footer className="fp-footer">
-      <div className="fp-footer__inner">
-        <div className="fp-footer__col">
-          <div className="fp-lockup fp-lockup--small">floating<span className="fp-lockup__dot">.</span></div>
-          <p className="fp-footer__tag">engineering that doesn't drift.</p>
-        </div>
-        <div className="fp-footer__col">
-          <div className="fp-footer__util">studio</div>
-          <a href="#">work</a>
-          <a href="#">services</a>
-          <a href="#">studio</a>
-          <a href="#">notes</a>
-        </div>
-        <div className="fp-footer__col">
-          <div className="fp-footer__util">contact</div>
-          <a href="mailto:daniel@floatingpoint.pt">daniel@floatingpoint.pt</a>
-          <a href="mailto:vicente@floatingpoint.pt">vicente@floatingpoint.pt</a>
-          <span>aveiro, portugal</span>
-        </div>
-        <div className="fp-footer__col">
-          <div className="fp-footer__util">elsewhere</div>
-          <a href="#">github</a>
-          <a href="#">linkedin</a>
-          <a href="#">are.na</a>
-        </div>
-      </div>
-      <div className="fp-footer__rule" />
-      <div className="fp-footer__base">
-        <span>floating point lda · est. 2026</span>
-        <span>aveiro · portugal</span>
-        <span>floatingpoint.pt</span>
-      </div>
-    </footer>
-  );
-}
-
-window.Footer = Footer;
-</script>
-
-<script type="text/babel" data-presets="react">
-function App() {
-  const [current, setCurrent] = useState("work");
-  const [selectedCase, setSelectedCase] = useState(null);
-
-  const onNavigate = (id) => {
-    setCurrent(id);
-    const map = { top: "top", work: "work", services: "services", studio: "studio", notes: "work", contact: "contact" };
-    const target = document.getElementById(map[id] || id);
-    if (target) target.scrollIntoView ? window.scrollTo({ top: target.offsetTop - 60, behavior: "smooth" }) : null;
-  };
-
-  return (
-    <>
-      <Header current={current} onNavigate={onNavigate} />
-      <Hero />
-      <Cases onSelect={setSelectedCase} />
-      <Services />
-      <Studio />
-      <Contact />
-      <Footer />
-      {selectedCase && (
-        <div className="fp-modal" onClick={() => setSelectedCase(null)}>
-          <div className="fp-modal__panel" onClick={(e) => e.stopPropagation()}>
-            <div className="fp-modal__head">
-              <div>
-                <div className="fp-util" style={{ marginBottom: 8 }}>case · {selectedCase.n} · {selectedCase.year}</div>
-                <h3 className="fp-modal__title">{selectedCase.title}.</h3>
-              </div>
-              <button className="fp-modal__close" onClick={() => setSelectedCase(null)}>close ✕</button>
-            </div>
-            <div className="fp-modal__body">
-              <p><strong style={{ color: "var(--ink)", fontWeight: 500 }}>{selectedCase.client}</strong></p>
-              <p>{selectedCase.body}</p>
-              <p>engagement scoped at four months. shipped in three. retained for ongoing work through {selectedCase.year}.</p>
-              <p>tech: rust, postgres, custom numerical kernels. typed end-to-end.</p>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-</script>
 </body>
 </html>
