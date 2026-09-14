@@ -144,6 +144,9 @@
   /* SplitText line masks clip at the line box; give descenders room without moving layout */
   .ln-mask, .line-mask { padding-bottom: 0.18em; margin-bottom: -0.18em; }
 
+  /* the point travels the page on a fixed canvas; paper under a difference blend reads as ink on paper and paper on ink */
+  .orb { position: fixed; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; z-index: 30; mix-blend-mode: difference; }
+
   /* ---------- hero ---------- */
   .hero {
     position: relative;
@@ -235,6 +238,10 @@
     background: var(--ink); transform-origin: left center; transform: scaleX(0);
     opacity: 0.6;
   }
+  .mark { position: relative; width: 56px; height: 56px; margin-bottom: 28px; }
+  .mark-dot { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); transform: translate(-50%, -50%); }
+  .mark svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+  .mark-ring { fill: none; stroke: var(--ink); stroke-width: 1.25; stroke-dasharray: 169.65; stroke-dashoffset: 0; }
   .offer h3 {
     font-size: 28px;
     font-weight: 600;
@@ -376,6 +383,7 @@
     font-weight: 600; letter-spacing: -0.025em; line-height: 1.02; color: var(--ink);
   }
   .brief-intro .util { display: block; margin-bottom: 16px; }
+  .hdot { display: inline-block; width: 0.165em; height: 0.165em; margin-left: 0.11em; border-radius: 50%; background: var(--ink); vertical-align: baseline; }
   .brief-intro p { margin-top: 20px; font-size: 16px; max-width: 38ch; }
   .brief-intro .direct { margin-top: 28px; font-family: var(--mono); font-size: 13px; }
   .brief-intro .direct a { color: var(--ink); border-bottom: 1px solid var(--rule); }
@@ -445,6 +453,7 @@
 </style>
 </head>
 <body>
+<canvas class="orb" id="orb" aria-hidden="true"></canvas>
 <header class="header" id="header">
   <div class="wrap">
     <a class="lockup" href="#top" aria-label="floating point, home">floating.</a>
@@ -462,7 +471,7 @@
 </header>
 
 <main id="top">
-  <section class="hero" id="hero" aria-labelledby="hero-lead">
+  <section class="hero" id="hero" aria-labelledby="hero-lead" data-orb="hero">
     <div class="wrap hero-inner">
       <h1 aria-label="floating.">
         <span>floating</span><span class="period" id="period" aria-hidden="true"></span>
@@ -479,7 +488,7 @@
     </div>
   </section>
 
-  <section class="section services" id="services" aria-labelledby="services-h">
+  <section class="section services" id="services" aria-labelledby="services-h" data-orb="services">
     <canvas class="field" id="field" aria-hidden="true"></canvas>
     <div class="wrap">
     <header class="section-head">
@@ -487,6 +496,7 @@
     </header>
     <div class="offers">
       <article class="offer" data-row>
+        <div class="mark" aria-hidden="true"><span class="mark-dot"></span></div>
         <h3>software</h3>
         <p data-i18n="sw_p">we design, build and run software for companies of any size, from a first product to the systems a whole operation depends on.</p>
         <ul>
@@ -500,6 +510,7 @@
         <span class="rule-draw" aria-hidden="true"></span>
       </article>
       <article class="offer" data-row>
+        <div class="mark ring" aria-hidden="true"><span class="mark-dot"></span><svg viewBox="0 0 56 56"><circle class="mark-ring" cx="28" cy="28" r="27" /></svg></div>
         <h3 data-i18n="cs_h">cybersecurity</h3>
         <p data-i18n="cs_p">we find the weaknesses before someone else does, fix them, and keep watch afterwards.</p>
         <ul>
@@ -516,7 +527,7 @@
     </div>
   </section>
 
-  <section class="section wrap method" id="method" aria-labelledby="method-h">
+  <section class="section wrap method" id="method" aria-labelledby="method-h" data-orb="method">
     <div class="method-grid">
       <div class="method-side">
         <h2 id="method-h" data-i18n="m_h">how a project runs.</h2>
@@ -549,7 +560,7 @@
     </div>
   </section>
 
-  <section class="section studio" id="studio" aria-labelledby="studio-h">
+  <section class="section studio" id="studio" aria-labelledby="studio-h" data-orb="studio">
     <div class="wrap">
       <h2 id="studio-h" data-lines-dark data-i18n="st_h">three points define a plane.</h2>
       <div class="people">
@@ -568,12 +579,12 @@
     </div>
   </section>
 
-  <section class="section wrap" id="brief" aria-labelledby="brief-h">
+  <section class="section wrap" id="brief" aria-labelledby="brief-h" data-orb="brief">
     <div class="brief-grid">
       <div class="brief-intro">
-        <h2 id="brief-h" data-i18n="b_h">tell us what you are building.</h2>
+        <h2 id="brief-h"><span data-i18n="b_h">tell us what you are building</span><span class="hdot" id="brief-dot" aria-hidden="true"></span></h2>
         <p data-i18n="b_p">one paragraph is enough. what it is, what is hard about it, when you need it. we read everything ourselves and reply within two working days.</p>
-        <p class="direct"><span data-i18n="b_or">or write directly:</span> <a href="mailto:general@floatingpoint.pt">general@floatingpoint.pt</a></p>
+        <p class="direct"><span data-i18n="b_or">or write directly:</span> <a href="mailto:general@flt.pt">general@flt.pt</a></p>
       </div>
       <form class="form" id="form" novalidate>
         <div class="field">
@@ -601,7 +612,7 @@
   </section>
 </main>
 
-<footer>
+<footer data-orb="footer">
   <div class="wrap">
     <div class="foot-grid">
       <div>
@@ -617,15 +628,15 @@
       </div>
       <div class="foot-col">
         <span class="util" data-i18n="ft_contact">contact</span>
-        <a href="mailto:daniel@floatingpoint.pt">daniel@floatingpoint.pt</a>
-        <a href="mailto:vicente@floatingpoint.pt">vicente@floatingpoint.pt</a>
-        <a href="mailto:sebastiao@floatingpoint.pt">sebastiao@floatingpoint.pt</a>
+        <a href="mailto:daniel@flt.pt">daniel@flt.pt</a>
+        <a href="mailto:vicente@flt.pt">vicente@flt.pt</a>
+        <a href="mailto:sebastiao@flt.pt">sebastiao@flt.pt</a>
         <span>aveiro, portugal</span>
       </div>
       <div class="foot-col">
         <span class="util" data-i18n="ft_else">elsewhere</span>
         <a href="https://github.com/dferrero17" rel="noopener">github</a>
-        <a href="https://floatingpoint.pt" rel="noopener">floatingpoint.pt</a>
+        <a href="https://flt.pt" rel="noopener">flt.pt</a>
       </div>
     </div>
     <div class="foot-base">
@@ -639,6 +650,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/SplitText.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.11/dist/lenis.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function () {
   'use strict';
@@ -667,7 +679,7 @@
     step2: 'âmbito', step2p: 'escrevemos o que vai ser construído, o preço e a data. assinas.',
     step3: 'construção', step3p: 'entregamos em incrementos regulares até estar em produção, e ficamos para as correções depois.',
     st_h: 'três pontos definem um plano.', role1: 'cofundador · sócio-gerente', role2: 'cofundador',
-    b_h: 'conta-nos o que estás a construir.',
+    b_h: 'conta-nos o que estás a construir',
     b_p: 'um parágrafo chega. o que é, o que tem de difícil, quando precisas. lemos tudo nós próprios e respondemos em dois dias úteis.',
     b_or: 'ou escreve diretamente:', f_name: 'nome', f_company: 'empresa', f_opt: 'opcional', f_brief: 'briefing',
     f_ph: 'o que estás a construir, o que tem de difícil, quando precisas.', f_send: 'enviar o briefing',
@@ -675,10 +687,10 @@
     ft_tag: 'software e cibersegurança, aveiro.', ft_site: 'site', ft_contact: 'contacto', ft_else: 'outros',
     // runtime strings
     need: 'nome, email e o briefing são necessários.',
-    handed: 'entregue ao teu cliente de email. se nada abriu, escreve para general@floatingpoint.pt.',
+    handed: 'entregue ao teu cliente de email. se nada abriu, escreve para general@flt.pt.',
     subject: 'briefing de '
   };
-  const EN = { need: 'name, email and the brief are needed.', handed: 'handed to your mail client. if nothing opened, write to general@floatingpoint.pt.', subject: 'brief from ' };
+  const EN = { need: 'name, email and the brief are needed.', handed: 'handed to your mail client. if nothing opened, write to general@flt.pt.', subject: 'brief from ' };
   const i18nNodes = document.querySelectorAll('[data-i18n]');
   i18nNodes.forEach(n => { n.dataset.en = n.textContent; });
   document.querySelectorAll('[data-i18n-ph]').forEach(n => { n.dataset.en = n.getAttribute('placeholder'); });
@@ -713,7 +725,7 @@
     if (!name || !email || !brief) { note.textContent = T().need; return; }
     const subject = T().subject + name + (company ? ' · ' + company : '');
     const body = brief + '\n\n' + name + '\n' + email + (company ? '\n' + company : '');
-    window.location.href = 'mailto:general@floatingpoint.pt?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    window.location.href = 'mailto:general@flt.pt?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
     note.textContent = T().handed;
   });
 
@@ -744,7 +756,7 @@
   // smooth scroll
   let lenis = null;
   if (window.Lenis) {
-    lenis = new Lenis({ lerp: 0.11, smoothWheel: true });
+    lenis = new Lenis({ lerp: 0.14, smoothWheel: true });
     lenis.on('scroll', (e) => { ScrollTrigger.update(); onScroll(e.scroll); });
     gsap.ticker.add((t) => lenis.raf(t * 1000));
     gsap.ticker.lagSmoothing(0);
@@ -765,7 +777,7 @@
   const canvas = document.getElementById('field');
   const ctx = canvas.getContext('2d');
   const coarse = window.matchMedia('(pointer: coarse)').matches;
-  const field = { w: 0, h: 0, dpr: 1, p: 0, mx: 0, my: 0, tx: 0, ty: 0, dots: [], t: 0 };
+  const field = { w: 0, h: 0, dpr: 1, p: 0, mx: 0, my: 0, tx: 0, ty: 0, dots: [], t: 0, k: -1 };
 
   function sizeField() {
     const r = fieldHost.getBoundingClientRect();
@@ -792,9 +804,14 @@
         ph: prev ? prev.ph : Math.random() * Math.PI * 2,
         sp: prev ? prev.sp : 0.004 + Math.random() * 0.006,
         amp: prev ? prev.amp : 0.004 + Math.random() * 0.008,
-        vx: prev ? prev.vx : (Math.random() - 0.5) * 0.004
+        vx: prev ? prev.vx : (Math.random() - 0.5) * 0.004, px: 0, py: 0
       });
     }
+    // the point's seat: the grid point nearest the upper right, held steady
+    let best = 0, bd = 1e9;
+    field.dots.forEach((d, i) => { const dd = Math.hypot(d.gx - r.width * 0.86, d.gy - r.height * 0.3); if (dd < bd) { bd = dd; best = i; } });
+    field.k = best;
+    const seat = field.dots[best]; seat.x = seat.gx / r.width; seat.y = seat.gy / r.height; seat.vx = 0; seat.amp *= 0.4;
   }
   const smooth = (u) => { u = Math.min(1, Math.max(0, u)); return u * u * (3 - 2 * u); };
   function drawField(dt) {
@@ -806,20 +823,21 @@
     const fade = smooth(p / 0.12) * (1 - smooth((p - 0.9) / 0.1));
     ctx.clearRect(0, 0, field.w, field.h);
     ctx.fillStyle = '#2a2730';
-    for (const d of field.dots) {
+    field.dots.forEach((d, i) => {
       d.x += d.vx * dt; if (d.x < -0.02) d.x = 1.02; if (d.x > 1.02) d.x = -0.02;
       const wob = Math.sin(field.t * d.sp * 60 + d.ph) * d.amp;
       const fx = (d.x + wob) * field.w + field.mx * d.z * 26;
       const fy = (d.y + wob * 0.6) * field.h + field.my * d.z * 16 - (p - 0.5) * 140 * d.z;
-      const x = fx + (d.gx + field.mx * 8 - fx) * k;
-      const y = fy + (d.gy - fy) * k;
+      d.px = fx + (d.gx + field.mx * 8 - fx) * k;
+      d.py = fy + (d.gy - fy) * k;
+      if (i === field.k) return;                       // the point sits here
       const a = d.a * fade * (1 - k * 0.35);
-      if (a <= 0.005) continue;
+      if (a <= 0.005) return;
       ctx.globalAlpha = a;
       ctx.beginPath();
-      ctx.arc(x, y, d.r * (1 - k * 0.3), 0, Math.PI * 2);
+      ctx.arc(d.px, d.py, d.r * (1 - k * 0.3), 0, Math.PI * 2);
       ctx.fill();
-    }
+    });
     ctx.globalAlpha = 1;
   }
   sizeField();
@@ -834,6 +852,9 @@
   }
   window.addEventListener('resize', () => { sizeField(); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { sizeField(); ScrollTrigger.refresh(); });
+  gsap.timeline({ scrollTrigger: { trigger: '.offers', start: 'top 78%', once: true } })
+    .from('.mark-dot', { scale: 0, duration: 0.6, ease: 'back.out(2)', stagger: 0.15 }, 0)
+    .fromTo('.mark-ring', { strokeDashoffset: 169.65 }, { strokeDashoffset: 0, duration: 1.3, ease: 'power2.inOut' }, 0.5);
   const servicesText = fieldHost.querySelector('.wrap');
   gsap.timeline({
     scrollTrigger: {
@@ -916,7 +937,7 @@
       const mix = (k) => a[k] + (b[k] - a[k]) * u;
       gsap.set(period, { x: mix('x'), y: mix('y'), scaleX: mix('sx'), scaleY: mix('sy'), opacity: mix('op') });
     },
-    onComplete() { gsap.set(period, { clearProps: 'all' }); }
+    onComplete() { gsap.set(period, { clearProps: 'all' }); if (window.__orbTakeover) window.__orbTakeover(); }
   }, 0);
 
   // type comes in after the dot lands: lines rise in masks
@@ -948,6 +969,7 @@
   }
   function markerTo(step, animate) {
     steps.forEach(x => x.classList.toggle('is-active', x === step));
+    if (window.__orbStep) { window.__orbStep(step, animate); return; }
     const y = stepY(step);
     if (hop) hop.kill();
     if (!animate) { gsap.set(marker, { top: y, scaleX: 1, scaleY: 1 }); return; }
@@ -981,7 +1003,7 @@
 
   // studio: the line draws across, then the aveiro mark lands on it
   const DRAW = 2.2;
-  gsap.timeline({ scrollTrigger: { trigger: '#geo', start: 'top 80%', once: true } })
+  gsap.timeline({ scrollTrigger: { trigger: '#geo', start: 'top 92%', end: 'top 55%', scrub: 0.6 } })
     .from('#geo-line', { scaleX: 0, duration: DRAW, ease: 'power2.inOut' }, 0)
     .from('.geo-tick', { scaleY: 0, opacity: 0, duration: 0.5, ease: 'power2.out',
       stagger: { each: DRAW / 16, ease: 'power2.inOut' } }, 0.05)
@@ -997,6 +1019,149 @@
   });
 
   // re-split on resize so masks match the new line breaks
+  gsap.to('#geo', { opacity: 0, ease: 'none', scrollTrigger: { trigger: '#geo', start: 'top 28%', end: 'top 6%', scrub: true } });
+
+  /* ------------------------------------------------------------------
+     the point. the period of "floating." is where it starts: the bounce
+     lands and the orb takes the dot's place. from there one orb on a fixed
+     canvas travels the page: a dot in the field, the marker on the method
+     track, the aveiro mark on the line, the period of the last heading.
+     ------------------------------------------------------------------ */
+  if (window.THREE) {
+    const PAPER = 0xe0dfd4;   // paper minus ink: under the difference blend this reads as ink on paper
+    const dpr = Math.min(1.5, window.devicePixelRatio || 1);
+    const orbCanvas = document.getElementById('orb');
+    const orbR = new THREE.WebGLRenderer({ canvas: orbCanvas, alpha: true, antialias: true, powerPreference: 'low-power' });
+    orbR.setPixelRatio(dpr); orbR.setClearColor(0x000000, 0);
+    const orbScene = new THREE.Scene();
+    const orbCam = new THREE.PerspectiveCamera(32, 1, 0.1, 60); orbCam.position.z = 9;
+    const fit = () => { const w = orbCanvas.clientWidth || 1, h = orbCanvas.clientHeight || 1; orbR.setSize(w, h, false); orbCam.aspect = w / h; orbCam.updateProjectionMatrix(); };
+    const orb = new THREE.Group(); orbScene.add(orb);
+    const R = 1.7;
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(R, 64, 48), new THREE.MeshBasicMaterial({ color: PAPER, transparent: true, opacity: 0 })); orb.add(dot);
+    fit();
+    const vhWorld = () => 2 * orbCam.position.z * Math.tan(orbCam.fov * Math.PI / 360);
+    const pxPerUnit = () => window.innerHeight / vhWorld();
+    const scaleForPx = (d) => d / (2 * R * pxPerUnit());   // scale so the sphere spans d pixels
+
+    const o = { x: 0.5, y: 0.5, s: 0.1, gx: 0.5, gy: 0.5, gs: 0.1, section: 'hero', follow: null, k: 0.6, hop: null, took: false };
+    const rectOf = (el) => el.getBoundingClientRect();
+    const geoDotEl = document.querySelector('.geo-dot'), briefDotEl = document.getElementById('brief-dot');
+    const last = { x: -1, y: -1, s: -1, v: null };
+    const orbVisibleNow = () => dot.visible;
+    const FOLLOW = {
+      period: () => { const r = rectOf(period); return { x: r.left + r.width / 2, y: r.top + r.height / 2, s: scaleForPx(r.width) }; },
+      field:  () => { const r = rectOf(fieldHost), d = field.dots[field.k]; return { x: r.left + d.px, y: r.top + d.py, s: scaleForPx(9) }; },
+      // the marker on the method track, level with the current step's title
+      step:   () => { const tr = rectOf(track), h = rectOf((hoverStep || scrollStep).querySelector('h3')); return { x: tr.left + tr.width / 2, y: h.top + h.height / 2, s: scaleForPx(12) }; },
+      geo:    () => { const r = rectOf(document.querySelector('.geo-dot')); return { x: r.left + r.width / 2, y: r.top + r.height / 2, s: scaleForPx(r.width * 2) }; },
+      bdot:   () => { const r = rectOf(document.getElementById('brief-dot')); return { x: r.left + r.width / 2, y: r.top + r.height / 2, s: scaleForPx(r.width) }; }
+    };
+    const setTarget = (t) => { o.gx = t.x / window.innerWidth; o.gy = t.y / window.innerHeight; o.gs = t.s; };
+    setTarget(FOLLOW.period()); o.x = o.gx; o.y = o.gy; o.s = o.gs;
+
+    // the bounce lands: the orb is placed exactly on the dot and the two swap in one frame
+    window.__orbTakeover = () => {
+      setTarget(FOLLOW.period()); o.x = o.gx; o.y = o.gy; o.s = o.gs;
+      orb.position.set((o.x - 0.5) * vhWorld() * orbCam.aspect, (0.5 - o.y) * vhWorld(), 0); orb.scale.set(o.s, o.s, o.s);
+      dot.material.opacity = 1; dot.material.transparent = false;
+      orbR.render(orbScene, orbCam);
+      period.style.opacity = '0';
+      o.took = true;
+    };
+
+    // the dom marker steps aside; the orb hops along the track instead, squash and stretch included
+    gsap.set(marker, { opacity: 0 });
+    window.__orbStep = (step, animate) => {
+      if (o.section !== 'method' || !animate) return;
+      const from = { x: o.x, y: o.y }, t = FOLLOW.step();
+      const to = { x: t.x / window.innerWidth, y: t.y / window.innerHeight };
+      if (Math.abs(to.y - from.y) < 0.002) return;
+      o.hop = { u: 0, from, to };
+      const dur = gsap.utils.clamp(0.35, 0.7, Math.abs(to.y - from.y) * window.innerHeight / 500);
+      gsap.timeline({ onComplete() { o.hop = null; } })
+        .to(orb.scale, { y: () => o.s * 0.72, x: () => o.s * 1.22, duration: 0.1, ease: 'power2.in' }, 0)
+        .to(o.hop, { u: 1, duration: dur, ease: 'power2.inOut' }, 0.1)
+        .to(orb.scale, { y: () => o.s * 1.3, x: () => o.s * 0.84, duration: dur * 0.5, ease: 'power2.out' }, 0.1)
+        .to(orb.scale, { y: () => o.s * 0.6, x: () => o.s * 1.35, duration: 0.09, ease: 'power2.in' }, 0.1 + dur)
+        .to(orb.scale, { y: () => o.s, x: () => o.s, duration: 0.5, ease: 'elastic.out(1.1, 0.45)' }, 0.19 + dur);
+    };
+
+    const STATES = {
+      hero:     { follow: 'period', k: 0.6 },
+      services: { follow: 'field',  k: 0.12 },
+      method:   { follow: 'step',   k: 0.3 },
+      studio:   { follow: 'geo',    k: 0.2 },
+      brief:    { follow: 'bdot',   k: 0.2 },
+      footer:   { follow: 'bdot',   k: 0.3 }
+    };
+    function applyState(name) {
+      const st = STATES[name] || STATES.hero;
+      o.section = name; o.follow = st.follow; o.k = st.k; o.hop = null;
+    }
+    // the current section is the last one whose top has passed the 55% line; at the top that is the hero
+    const sectionEls = Array.from(document.querySelectorAll('[data-orb]'));
+    function currentSection() {
+      const line = window.innerHeight * 0.55;
+      let cur = 'hero';
+      sectionEls.forEach((el) => { if (el.getBoundingClientRect().top <= line) cur = el.dataset.orb; });
+      return cur;
+    }
+
+    gsap.ticker.add(() => {
+      const cur = currentSection(); if (cur !== o.section) applyState(cur);
+      if (o.follow && !o.hop) setTarget(FOLLOW[o.follow]());
+      if (o.hop) {
+        const u = o.hop.u;
+        o.x = o.hop.from.x + (o.hop.to.x - o.hop.from.x) * u;
+        o.y = o.hop.from.y + (o.hop.to.y - o.hop.from.y) * u;
+      } else {
+        o.x += (o.gx - o.x) * o.k; o.y += (o.gy - o.y) * o.k; o.s += (o.gs - o.s) * o.k;
+      }
+      const vh = vhWorld(), vw = vh * orbCam.aspect;
+      orb.position.set((o.x - 0.5) * vw, (0.5 - o.y) * vh, 0);
+      if (!gsap.isTweening(orb.scale)) orb.scale.set(o.s, o.s, o.s); else orb.scale.z = o.s;
+      dot.visible = o.took;
+      // the stand-in dots step aside only while the orb is on them; visibility leaves their own animations alone
+      const nearTarget = Math.hypot((o.gx - o.x) * window.innerWidth, (o.gy - o.y) * window.innerHeight) < 3;
+      geoDotEl.style.visibility = (o.follow === 'geo' && nearTarget) ? 'hidden' : '';
+      briefDotEl.style.visibility = (o.follow === 'bdot' && nearTarget) ? 'hidden' : '';
+      // draw only when something moved
+      const moved = Math.abs(o.x - last.x) > 1e-5 || Math.abs(o.y - last.y) > 1e-5 || Math.abs(o.s - last.s) > 1e-5 || gsap.isTweening(orb.scale) || last.v !== orbVisibleNow();
+      if (moved) { orbR.render(orbScene, orbCam); last.x = o.x; last.y = o.y; last.s = o.s; last.v = orbVisibleNow(); }
+    });
+    window.addEventListener('resize', fit);
+
+    // when scrolling stops near a section top, the page settles onto it
+    if (lenis) {
+      const stopEls = ['#services', '#method', '#studio', '#brief'].map((q) => document.querySelector(q));
+      const stops = () => [0, ...stopEls.map((el) => el.getBoundingClientRect().top + window.scrollY - 64), document.documentElement.scrollHeight - window.innerHeight];
+      // magnetic, not automatic: only when the reader has stopped, only near a stop, and only
+      // ahead in the direction they were going (a short way back is allowed)
+      let idle = null, settling = false, lastY = window.scrollY, dir = 1, lastInput = 0;
+      ['wheel', 'touchmove', 'keydown'].forEach((ev) => window.addEventListener(ev, () => { lastInput = performance.now(); }, { passive: true }));
+      lenis.on('scroll', () => {
+        const y = window.scrollY;
+        if (Math.abs(y - lastY) > 0.5) dir = y > lastY ? 1 : -1;
+        lastY = y;
+        if (settling) return;
+        clearTimeout(idle);
+        idle = setTimeout(() => {
+          if (performance.now() - lastInput < 260) return;            // still scrolling
+          const list = stops();
+          let best = list[0]; list.forEach((v) => { if (Math.abs(v - y) < Math.abs(best - y)) best = v; });
+          const delta = best - y, dist = Math.abs(delta);
+          const ahead = Math.sign(delta) === dir;
+          if (dist > 2 && dist < (ahead ? window.innerHeight * 0.22 : 72)) {
+            settling = true;
+            lenis.scrollTo(best, { duration: 0.7, easing: (u) => 1 - Math.pow(1 - u, 3), onComplete: () => { setTimeout(() => { settling = false; }, 80); } });
+            setTimeout(() => { settling = false; }, 1400);           // never stay locked if the reader interrupts
+          }
+        }, 220);
+      });
+    }
+  }
+
   let rt;
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => ScrollTrigger.refresh(), 150); });
 })();
