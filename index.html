@@ -362,7 +362,7 @@
   }
   .geo-tick.major { height: 16px; background: rgba(245, 243, 238, 0.55); }
   .geo-mark { position: absolute; top: 0; left: 28.47%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 14px; }
-  .geo-dot { display: block; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: var(--paper); box-shadow: 0 0 0 6px var(--ink); transform-origin: 50% 100%; position: relative; z-index: 1; }
+  .geo-dot { visibility: hidden; display: block; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: var(--paper); box-shadow: 0 0 0 6px var(--ink); transform-origin: 50% 100%; position: relative; z-index: 1; }
   .geo-label { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--mist); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .people { margin-top: 48px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 900px; }
   .person { display: flex; gap: 14px; align-items: flex-start; }
@@ -383,7 +383,7 @@
     font-weight: 600; letter-spacing: -0.025em; line-height: 1.02; color: var(--ink);
   }
   .brief-intro .util { display: block; margin-bottom: 16px; }
-  .hdot { display: inline-block; width: 0.165em; height: 0.165em; margin-left: 0.11em; border-radius: 50%; background: var(--ink); vertical-align: baseline; }
+  .hdot { visibility: hidden; display: inline-block; width: 0.165em; height: 0.165em; margin-left: 0.11em; border-radius: 50%; background: var(--ink); vertical-align: baseline; }
   .brief-intro p { margin-top: 20px; font-size: 16px; max-width: 38ch; }
   .brief-intro .direct { margin-top: 28px; font-family: var(--mono); font-size: 13px; }
   .brief-intro .direct a { color: var(--ink); border-bottom: 1px solid var(--rule); }
@@ -1046,7 +1046,6 @@
 
     const o = { x: 0.5, y: 0.5, s: 0.1, gx: 0.5, gy: 0.5, gs: 0.1, section: 'hero', follow: null, k: 0.6, hop: null, took: false };
     const rectOf = (el) => el.getBoundingClientRect();
-    const geoDotEl = document.querySelector('.geo-dot'), briefDotEl = document.getElementById('brief-dot');
     const last = { x: -1, y: -1, s: -1, v: null };
     const orbVisibleNow = () => dot.visible;
     const FOLLOW = {
@@ -1122,10 +1121,6 @@
       orb.position.set((o.x - 0.5) * vw, (0.5 - o.y) * vh, 0);
       if (!gsap.isTweening(orb.scale)) orb.scale.set(o.s, o.s, o.s); else orb.scale.z = o.s;
       dot.visible = o.took;
-      // the stand-in dots step aside only while the orb is on them; visibility leaves their own animations alone
-      const nearTarget = Math.hypot((o.gx - o.x) * window.innerWidth, (o.gy - o.y) * window.innerHeight) < 3;
-      geoDotEl.style.visibility = (o.follow === 'geo' && nearTarget) ? 'hidden' : '';
-      briefDotEl.style.visibility = (o.follow === 'bdot' && nearTarget) ? 'hidden' : '';
       // draw only when something moved
       const moved = Math.abs(o.x - last.x) > 1e-5 || Math.abs(o.y - last.y) > 1e-5 || Math.abs(o.s - last.s) > 1e-5 || gsap.isTweening(orb.scale) || last.v !== orbVisibleNow();
       if (moved) { orbR.render(orbScene, orbCam); last.x = o.x; last.y = o.y; last.s = o.s; last.v = orbVisibleNow(); }
