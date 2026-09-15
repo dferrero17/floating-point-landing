@@ -734,6 +734,11 @@
   /* ------------------------------------------------------------------
      the line: 30° w to 45° e, a tick every 5 degrees, a taller one every 15
      ------------------------------------------------------------------ */
+  const geoMarkEl = document.getElementById('geo-mark'), geoHost = document.getElementById('geo');
+  const placeGeoMark = () => { geoMarkEl.style.left = (Math.round(geoHost.clientWidth * 0.2847) + 0.5) + 'px'; };
+  placeGeoMark();
+  window.addEventListener('resize', placeGeoMark);
+
   const ticksEl = document.getElementById('geo-ticks');
   for (let deg = -30; deg <= 45; deg += 5) {
     const t = document.createElement('span');
@@ -1094,7 +1099,7 @@
     // it shares this canvas, so it costs no second webgl context.
     const cyber = document.getElementById('cyber-mark');
     const cyberWire = new THREE.LineSegments(
-      new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(R, 1)),
+      new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(R, 0)),   // 30 edges: legible at mark size
       new THREE.LineBasicMaterial({ color: PAPER, transparent: true, opacity: 0 }));
     cyberWire.userData.total = cyberWire.geometry.attributes.position.count;
     cyberWire.geometry.setDrawRange(0, 0);
@@ -1103,8 +1108,8 @@
     new IntersectionObserver((es) => { cyberOn = es[0].isIntersecting; }).observe(cyber);
     const cw = { d: 0 };
     gsap.timeline({ scrollTrigger: { trigger: '.offers', start: 'top 78%', once: true } })
-      .to(cyberWire.material, { opacity: 0.9, duration: 0.45, ease: 'power2.out' }, 0.5)
-      .to(cw, { d: 1, duration: 1.4, ease: 'power2.inOut',
+      .to(cyberWire.material, { opacity: 0.9, duration: 0.9, ease: 'power2.out' }, 0.6)
+      .to(cw, { d: 1, duration: 4.5, ease: 'power1.inOut',
         onUpdate() { cyberWire.geometry.setDrawRange(0, Math.floor(cyberWire.userData.total * cw.d)); } }, 0.5);
 
     const STATES = {
@@ -1130,7 +1135,7 @@
       return cur;
     }
 
-    gsap.ticker.add(() => {
+    gsap.ticker.add((t) => {
       const cur = currentSection(); if (cur !== o.section) applyState(cur);
       if (o.follow && !o.hop) setTarget(FOLLOW[o.follow]());
       if (o.hop) {
@@ -1147,7 +1152,7 @@
         const r = cyber.getBoundingClientRect(), cs = scaleForPx(84);
         cyberWire.position.set(((r.left + r.width / 2) / CW() - 0.5) * vw, (0.5 - (r.top + r.height / 2) / CH()) * vh, 0);
         cyberWire.scale.set(cs, cs, cs);
-        cyberWire.rotation.y += 0.00105; cyberWire.rotation.x = 0.42;
+        cyberWire.rotation.y = t * 0.026; cyberWire.rotation.x = 0.42;   // about four minutes a turn, and frame-rate independent
       }
       orb.position.set((o.x - 0.5) * vw, (0.5 - o.y) * vh, 0);
       if (!gsap.isTweening(orb.scale)) orb.scale.set(o.s, o.s, o.s); else orb.scale.z = o.s;
