@@ -238,10 +238,10 @@
     background: var(--ink); transform-origin: left center; transform: scaleX(0);
     opacity: 0.6;
   }
-  .mark { position: relative; width: 56px; height: 56px; margin-bottom: 28px; }
+  /* both marks keep the same box so the two columns stay level; the shell around the
+     second one is drawn on the overlay and needs the room above and below */
+  .mark { position: relative; width: 56px; height: 56px; margin-block: 26px 46px; }
   .mark-dot { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); transform: translate(-50%, -50%); }
-  .mark svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
-  .mark-ring { fill: none; stroke: var(--ink); stroke-width: 1.25; stroke-dasharray: 169.65; stroke-dashoffset: 0; }
   .offer h3 {
     font-size: 28px;
     font-weight: 600;
@@ -361,9 +361,11 @@
     transform-origin: top center;
   }
   .geo-tick.major { height: 16px; background: rgba(245, 243, 238, 0.55); }
-  .geo-mark { position: absolute; top: 0; left: 28.47%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 14px; }
-  .geo-dot { visibility: hidden; display: block; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: var(--paper); box-shadow: 0 0 0 6px var(--ink); transform-origin: 50% 100%; position: relative; z-index: 1; }
-  .geo-label { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--mist); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  /* the mark is a point held above the line by one hairline */
+  .geo-mark { position: absolute; top: 0; left: 28.47%; width: 0; height: 0; }
+  .geo-stem { position: absolute; left: 0; top: -22px; width: 1px; height: 22px; background: var(--paper); transform: translateX(-50%); transform-origin: 50% 0; }
+  .geo-dot { visibility: hidden; position: absolute; left: -6px; top: -28px; width: 12px; height: 12px; border-radius: 50%; background: var(--paper); transform-origin: 50% 100%; }
+  .geo-label { position: absolute; left: 0; top: 14px; transform: translateX(-50%); font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--mist); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .people { margin-top: 48px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 900px; }
   .person { display: flex; gap: 14px; align-items: flex-start; }
   .person .dot { flex: none; width: 10px; height: 10px; margin-top: 7px; border-radius: 50%; background: var(--paper); }
@@ -510,7 +512,7 @@
         <span class="rule-draw" aria-hidden="true"></span>
       </article>
       <article class="offer" data-row>
-        <div class="mark ring" aria-hidden="true"><span class="mark-dot"></span><svg viewBox="0 0 56 56"><circle class="mark-ring" cx="28" cy="28" r="27" /></svg></div>
+        <div class="mark ring" id="cyber-mark" aria-hidden="true"><span class="mark-dot"></span></div>
         <h3 data-i18n="cs_h">cybersecurity</h3>
         <p data-i18n="cs_p">we find the weaknesses before someone else does, fix them, and keep watch afterwards.</p>
         <ul>
@@ -572,6 +574,7 @@
       <span class="geo-line" id="geo-line"></span>
       <span class="geo-ticks" id="geo-ticks" aria-hidden="true"></span>
       <span class="geo-mark" id="geo-mark">
+        <span class="geo-stem"></span>
         <span class="geo-dot"></span>
         <span class="geo-label">aveiro, 40.6405° n, 8.6538° w</span>
       </span>
@@ -853,7 +856,7 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { sizeField(); ScrollTrigger.refresh(); });
   gsap.timeline({ scrollTrigger: { trigger: '.offers', start: 'top 78%', once: true } })
     .from('.mark-dot', { scale: 0, duration: 0.6, ease: 'back.out(2)', stagger: 0.15 }, 0)
-    .fromTo('.mark-ring', { strokeDashoffset: 169.65 }, { strokeDashoffset: 0, duration: 1.3, ease: 'power2.inOut' }, 0.5);
+    ;   // the shell around it is drawn in webgl, further down
   const servicesText = fieldHost.querySelector('.wrap');
   gsap.timeline({
     scrollTrigger: {
@@ -1006,10 +1009,11 @@
     .from('#geo-line', { scaleX: 0, duration: DRAW, ease: 'power2.inOut' }, 0)
     .from('.geo-tick', { scaleY: 0, opacity: 0, duration: 0.5, ease: 'power2.out',
       stagger: { each: DRAW / 16, ease: 'power2.inOut' } }, 0.05)
-    .from('#geo-mark .geo-dot', { y: -36, opacity: 0, scaleY: 1.3, scaleX: 0.8, duration: 0.55, ease: 'power2.in' }, DRAW * 0.2847 + 0.05)
-    .to('#geo-mark .geo-dot', { scaleY: 0.7, scaleX: 1.3, duration: 0.1, ease: 'power2.in' }, '>')
+    .from('#geo-mark .geo-dot', { y: -40, opacity: 0, scaleY: 1.3, scaleX: 0.8, duration: 0.55, ease: 'power2.in' }, DRAW * 0.2847 + 0.05)
+    .to('#geo-mark .geo-dot', { scaleY: 0.78, scaleX: 1.22, duration: 0.1, ease: 'power2.in' }, '>')
     .to('#geo-mark .geo-dot', { scaleY: 1, scaleX: 1, duration: 0.6, ease: 'elastic.out(1.1, 0.45)' }, '>')
-    .from('#geo-mark .geo-label', { opacity: 0, y: 8, duration: 0.7, ease: 'power2.out' }, '<0.1');
+    .from('#geo-mark .geo-stem', { scaleY: 0, duration: 0.5, ease: 'power2.out' }, '<0.05')
+    .from('#geo-mark .geo-label', { opacity: 0, y: 8, duration: 0.7, ease: 'power2.out' }, '<0.15');
 
   // brief form: fields settle in
   gsap.from('.form .field, .form .form-actions', {
@@ -1045,14 +1049,14 @@
 
     const o = { x: 0.5, y: 0.5, s: 0.1, gx: 0.5, gy: 0.5, gs: 0.1, section: 'hero', follow: null, k: 0.6, hop: null, took: false };
     const rectOf = (el) => el.getBoundingClientRect();
-    const last = { x: -1, y: -1, s: -1, v: null };
+    const last = { x: -1, y: -1, s: -1, o: -1, v: null };
     const orbVisibleNow = () => dot.visible;
     const FOLLOW = {
       period: () => { const r = rectOf(period); return { x: r.left + r.width / 2, y: r.top + r.height / 2, s: scaleForPx(r.width) }; },
-      field:  () => { const r = rectOf(fieldHost), d = field.dots[field.k]; return { x: r.left + d.px, y: r.top + d.py, s: scaleForPx(9) }; },
+      field:  () => { const r = rectOf(fieldHost), d = field.dots[field.k]; return { x: r.left + d.px, y: r.top + d.py, s: scaleForPx(STATES.services.px) }; },
       // the marker on the method track, level with the current step's title
       step:   () => { const tr = rectOf(track), h = rectOf((hoverStep || scrollStep).querySelector('h3')); return { x: tr.left + tr.width / 2, y: h.top + h.height / 2, s: scaleForPx(12) }; },
-      geo:    () => { const r = rectOf(document.querySelector('.geo-dot')); return { x: r.left + r.width / 2, y: r.top + r.height / 2, s: scaleForPx(r.width * 2) }; },
+      geo:    () => { const r = rectOf(document.querySelector('.geo-dot')); return { x: r.left + r.width / 2, y: r.top + r.height / 2, s: scaleForPx(r.width) }; },
       bdot:   () => { const r = rectOf(document.getElementById('brief-dot')); return { x: r.left + r.width / 2, y: r.top + r.height / 2, s: scaleForPx(r.width) }; }
     };
     const setTarget = (t) => { o.gx = t.x / window.innerWidth; o.gy = t.y / window.innerHeight; o.gs = t.s; };
@@ -1085,9 +1089,26 @@
         .to(orb.scale, { y: () => o.s, x: () => o.s, duration: 0.5, ease: 'elastic.out(1.1, 0.45)' }, 0.19 + dur);
     };
 
+    // the cybersecurity mark: the same icosahedron the point is built from, turning around it.
+    // it shares this canvas, so it costs no second webgl context.
+    const cyber = document.getElementById('cyber-mark');
+    const cyberWire = new THREE.LineSegments(
+      new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(R, 1)),
+      new THREE.LineBasicMaterial({ color: PAPER, transparent: true, opacity: 0 }));
+    cyberWire.userData.total = cyberWire.geometry.attributes.position.count;
+    cyberWire.geometry.setDrawRange(0, 0);
+    orbScene.add(cyberWire);
+    let cyberOn = false;
+    new IntersectionObserver((es) => { cyberOn = es[0].isIntersecting; }).observe(cyber);
+    const cw = { d: 0 };
+    gsap.timeline({ scrollTrigger: { trigger: '.offers', start: 'top 78%', once: true } })
+      .to(cyberWire.material, { opacity: 0.9, duration: 0.45, ease: 'power2.out' }, 0.5)
+      .to(cw, { d: 1, duration: 1.4, ease: 'power2.inOut',
+        onUpdate() { cyberWire.geometry.setDrawRange(0, Math.floor(cyberWire.userData.total * cw.d)); } }, 0.5);
+
     const STATES = {
       hero:     { follow: 'period', k: 0.6 },
-      services: { follow: 'field',  k: 0.12 },
+      services: { follow: 'field',  k: 0.12, px: 5, alpha: 0.4 },
       method:   { follow: 'step',   k: 0.3 },
       studio:   { follow: 'geo',    k: 0.2 },
       brief:    { follow: 'bdot',   k: 0.2 },
@@ -1096,6 +1117,8 @@
     function applyState(name) {
       const st = STATES[name] || STATES.hero;
       o.section = name; o.follow = st.follow; o.k = st.k; o.hop = null;
+      // in the field the point is one of the dots: as faint as its neighbours
+      if (o.took) gsap.to(dot.material, { opacity: st.alpha === undefined ? 1 : st.alpha, duration: 1.0, ease: 'power2.inOut' });
     }
     // the current section is the last one whose top has passed the 55% line; at the top that is the hero
     const sectionEls = Array.from(document.querySelectorAll('[data-orb]'));
@@ -1117,12 +1140,21 @@
         o.x += (o.gx - o.x) * o.k; o.y += (o.gy - o.y) * o.k; o.s += (o.gs - o.s) * o.k;
       }
       const vh = vhWorld(), vw = vh * orbCam.aspect;
+      // the shell turns slowly over the cybersecurity mark: about a revolution a minute
+      cyberWire.visible = cyberOn && cyberWire.material.opacity > 0.01;
+      if (cyberWire.visible) {
+        const r = cyber.getBoundingClientRect(), cs = scaleForPx(104);
+        cyberWire.position.set(((r.left + r.width / 2) / window.innerWidth - 0.5) * vw, (0.5 - (r.top + r.height / 2) / window.innerHeight) * vh, 0);
+        cyberWire.scale.set(cs, cs, cs);
+        cyberWire.rotation.y += 0.00105; cyberWire.rotation.x = 0.42;
+      }
       orb.position.set((o.x - 0.5) * vw, (0.5 - o.y) * vh, 0);
       if (!gsap.isTweening(orb.scale)) orb.scale.set(o.s, o.s, o.s); else orb.scale.z = o.s;
-      dot.visible = o.took;
+      dot.visible = o.took && dot.material.opacity > 0.01;
+      dot.material.transparent = dot.material.opacity < 0.999;
       // draw only when something moved
-      const moved = Math.abs(o.x - last.x) > 1e-5 || Math.abs(o.y - last.y) > 1e-5 || Math.abs(o.s - last.s) > 1e-5 || gsap.isTweening(orb.scale) || last.v !== orbVisibleNow();
-      if (moved) { orbR.render(orbScene, orbCam); last.x = o.x; last.y = o.y; last.s = o.s; last.v = orbVisibleNow(); }
+      const moved = Math.abs(o.x - last.x) > 1e-5 || Math.abs(o.y - last.y) > 1e-5 || Math.abs(o.s - last.s) > 1e-5 || Math.abs(dot.material.opacity - last.o) > 1e-3 || cyberWire.visible || gsap.isTweening(orb.scale) || last.v !== orbVisibleNow();
+      if (moved) { orbR.render(orbScene, orbCam); last.x = o.x; last.y = o.y; last.s = o.s; last.o = dot.material.opacity; last.v = orbVisibleNow(); }
     });
     window.addEventListener('resize', fit);
 
