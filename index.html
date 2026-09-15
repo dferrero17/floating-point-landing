@@ -240,7 +240,7 @@
   }
   /* both marks keep the same box so the two columns stay level; the shell around the
      second one is drawn on the overlay and needs the room above and below */
-  .mark { position: relative; width: 56px; height: 56px; margin-block: 26px 46px; }
+  .mark { position: relative; width: 56px; height: 56px; margin-block: 18px 38px; }
   .mark-dot { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); transform: translate(-50%, -50%); }
   .offer h3 {
     font-size: 28px;
@@ -1043,8 +1043,9 @@
     const R = 1.7;
     const dot = new THREE.Mesh(new THREE.SphereGeometry(R, 64, 48), new THREE.MeshBasicMaterial({ color: PAPER, transparent: true, opacity: 0 })); orb.add(dot);
     fit();
+    const CW = () => orbCanvas.clientWidth || 1, CH = () => orbCanvas.clientHeight || 1;
     const vhWorld = () => 2 * orbCam.position.z * Math.tan(orbCam.fov * Math.PI / 360);
-    const pxPerUnit = () => window.innerHeight / vhWorld();
+    const pxPerUnit = () => CH() / vhWorld();
     const scaleForPx = (d) => d / (2 * R * pxPerUnit());   // scale so the sphere spans d pixels
 
     const o = { x: 0.5, y: 0.5, s: 0.1, gx: 0.5, gy: 0.5, gs: 0.1, section: 'hero', follow: null, k: 0.6, hop: null, took: false };
@@ -1059,7 +1060,7 @@
       geo:    () => { const r = rectOf(document.querySelector('.geo-dot')); return { x: r.left + r.width / 2, y: r.top + r.height / 2, s: scaleForPx(r.width) }; },
       bdot:   () => { const r = rectOf(document.getElementById('brief-dot')); return { x: r.left + r.width / 2, y: r.top + r.height / 2, s: scaleForPx(r.width) }; }
     };
-    const setTarget = (t) => { o.gx = t.x / window.innerWidth; o.gy = t.y / window.innerHeight; o.gs = t.s; };
+    const setTarget = (t) => { o.gx = t.x / CW(); o.gy = t.y / CH(); o.gs = t.s; };
     setTarget(FOLLOW.period()); o.x = o.gx; o.y = o.gy; o.s = o.gs;
 
     // the bounce lands: the orb is placed exactly on the dot and the two swap in one frame
@@ -1077,7 +1078,7 @@
     window.__orbStep = (step, animate) => {
       if (o.section !== 'method' || !animate) return;
       const from = { x: o.x, y: o.y }, t = FOLLOW.step();
-      const to = { x: t.x / window.innerWidth, y: t.y / window.innerHeight };
+      const to = { x: t.x / CW(), y: t.y / CH() };
       if (Math.abs(to.y - from.y) < 0.002) return;
       o.hop = { u: 0, from, to };
       const dur = gsap.utils.clamp(0.35, 0.7, Math.abs(to.y - from.y) * window.innerHeight / 500);
@@ -1143,8 +1144,8 @@
       // the shell turns slowly over the cybersecurity mark: about a revolution a minute
       cyberWire.visible = cyberOn && cyberWire.material.opacity > 0.01;
       if (cyberWire.visible) {
-        const r = cyber.getBoundingClientRect(), cs = scaleForPx(104);
-        cyberWire.position.set(((r.left + r.width / 2) / window.innerWidth - 0.5) * vw, (0.5 - (r.top + r.height / 2) / window.innerHeight) * vh, 0);
+        const r = cyber.getBoundingClientRect(), cs = scaleForPx(84);
+        cyberWire.position.set(((r.left + r.width / 2) / CW() - 0.5) * vw, (0.5 - (r.top + r.height / 2) / CH()) * vh, 0);
         cyberWire.scale.set(cs, cs, cs);
         cyberWire.rotation.y += 0.00105; cyberWire.rotation.x = 0.42;
       }
